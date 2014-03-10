@@ -733,6 +733,45 @@ class RooaDoubleCBxBW : public RooAbsPdf {
     };
 
 
+///////////////////////////////////////////////////
+class RooSigPlusInt : public RooAbsPdf {
+public:
+  RooSigPlusInt(); 
+  RooSigPlusInt(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _delta,
+	      RooAbsReal& _width,
+	      RooAbsReal& _k,
+	      RooAbsReal& _CSquared,
+	      RooAbsReal& _alpha,
+	      RooAbsReal& _beta,
+	      RooAbsReal& _r);
+  RooSigPlusInt(const RooSigPlusInt& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooSigPlusInt(*this,newname); }
+  inline virtual ~RooSigPlusInt() { }
+  Double_t Spline(Double_t xx) const;
+  Double_t gamma_H_HTO(Double_t mPole) const;
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy delta ;
+  RooRealProxy width ;
+  RooRealProxy k ;
+  RooRealProxy CSquared ;
+  RooRealProxy alpha ;
+  RooRealProxy beta ;
+  RooRealProxy r ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooSigPlusInt,1) // Your description goes here...
+};
+
 
 
 
