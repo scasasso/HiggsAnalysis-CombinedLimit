@@ -744,6 +744,7 @@ public:
 	      RooAbsReal& _width,
 	      RooAbsReal& _k,
 	      RooAbsReal& _CSquared,
+	      RooAbsReal& _BRnew,
 	      RooAbsReal& _alpha,
 	      RooAbsReal& _beta,
 	      RooAbsReal& _r);
@@ -751,7 +752,6 @@ public:
   virtual TObject* clone(const char* newname) const { return new RooSigPlusInt(*this,newname); }
   inline virtual ~RooSigPlusInt() { }
   Double_t Spline(Double_t xx) const;
-  Double_t gamma_H_HTO(Double_t mPole) const;
 
 protected:
 
@@ -761,6 +761,7 @@ protected:
   RooRealProxy width ;
   RooRealProxy k ;
   RooRealProxy CSquared ;
+  RooRealProxy BRnew ;
   RooRealProxy alpha ;
   RooRealProxy beta ;
   RooRealProxy r ;
