@@ -122,5 +122,7 @@
 #pragma link C++ class RooGausExpPdf+;
 #pragma link C++ class RooDoubleCrystalBall+;
 #pragma link C++ class RooSigPlusInt+;
+#pragma link C++ class RooBWHighMassGGH+;
+#pragma link C++ class RooBWHighMassVBF+;
 
 #endif
