@@ -3757,6 +3757,1049 @@ double RooaDoubleCBxBW::evaluate() const
 
 
 
+/*************RooBWHighMassGGH***********/
+ClassImp(RooBWHighMassGGH) 
+
+ RooBWHighMassGGH::RooBWHighMassGGH(){}
+
+ RooBWHighMassGGH::RooBWHighMassGGH(const char *name, const char *title, 
+                        RooAbsReal& _x,
+                        RooAbsReal& _mH,
+			RooAbsReal& _KPrime,
+			RooAbsReal& _BRnew,
+			Bool_t is8TeV_b) :
+   RooAbsPdf(name,title), 
+   x("x","x",this,_x),
+   mH("mH","mH",this,_mH),
+   KPrime("KPrime","KPrime",this,_KPrime),
+   BRnew("BRnew","BRnew",this,_BRnew),
+   is8TeV(is8TeV_b)
+ { 
+   
+   setPars();
+
+ } 
+
+
+ RooBWHighMassGGH::RooBWHighMassGGH(const RooBWHighMassGGH& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   x("x",this,other.x),
+   mH("mH",this,other.mH),
+   KPrime("KPrime",this,other.KPrime),
+   BRnew("BRnew",this,other.BRnew),
+   is8TeV(other.is8TeV),
+   effKPrime(other.effKPrime),
+   width(other.width),
+   delta(other.delta),
+   alpha(other.alpha),
+   r(other.r),
+   beta(other.beta)
+ { 
+ } 
+
+
+
+ Double_t RooBWHighMassGGH::evaluate() const 
+ {    
+
+
+
+   Double_t bwHM = x / ( TMath::Power( TMath::Power(x,2) - TMath::Power(mH+delta,2) , 2 ) + TMath::Power(x,2)*TMath::Power(effKPrime*width,2) ); 
+   Double_t splineFactor = Spline(x);
+
+   Double_t signal = bwHM*splineFactor;
+     
+   Double_t k=0.25;
+   Double_t mH_eff = mH*TMath::Sqrt(1-k*(effKPrime*width/mH)*(effKPrime*width/mH));
+   TComplex MSquared(mH_eff*mH_eff,-effKPrime*width*mH_eff);
+   TComplex M = MSquared.Sqrt(MSquared);
+   TComplex Exp1 = MSquared.Exp((TComplex)alpha);
+   TComplex Exp2 = MSquared.Exp(-(TComplex)alpha);
+   TComplex Exp3 = MSquared.Exp(-x*(TComplex)alpha/M);
+
+   double interference = -r*(1-TMath::Exp(-beta*(x-150.)/mH_eff))*((Exp1/(x-M)-Exp2/(x+M))*Exp3).Re();
+
+   return signal + interference/( TMath::Sqrt(1-BRnew) );
+   
+   
+ } 
+
+
+
+
+void RooBWHighMassGGH::setPars() {
+
+  Double_t a_width[7][5];
+  Double_t a_delta[7][5];
+  Double_t a_alpha[7][5];
+  Double_t a_r[7][5];
+  Double_t a_beta[7][5];
+
+  if (is8TeV){
+
+    a_delta[0][0] = 0.015081577003;
+    a_delta[0][1] = 0.0576512292027;
+    a_delta[0][2] = 0.131081297994;
+    a_delta[0][3] = 0.243380963802;
+    a_delta[0][4] = 0.39500105381;
+    a_delta[1][0] = 0.0972077324986;
+    a_delta[1][1] = 0.434791147709;
+    a_delta[1][2] = 0.861800074577;
+    a_delta[1][3] = 1.58613061905;
+    a_delta[1][4] = 2.41115784645;
+    a_delta[2][0] = 0.242783889174;
+    a_delta[2][1] = 0.827510118484;
+    a_delta[2][2] = 1.78883588314;
+    a_delta[2][3] = 3.17804527283;
+    a_delta[2][4] = 4.9168419838;
+    a_delta[3][0] = 0.368439763784;
+    a_delta[3][1] = 1.45783913136;
+    a_delta[3][2] = 3.27468585968;
+    a_delta[3][3] = 5.93577003479;
+    a_delta[3][4] = 9.49385356903;
+    a_delta[4][0] = 0.679009974003;
+    a_delta[4][1] = 2.96808123589;
+    a_delta[4][2] = 6.60964488983;
+    a_delta[4][3] = 11.7470684052;
+    a_delta[4][4] = 18.1083869934;
+    a_delta[5][0] = 1.51261091232;
+    a_delta[5][1] = 5.85586261749;
+    a_delta[5][2] = 12.3102693558;
+    a_delta[5][3] = 21.393032074;
+    a_delta[5][4] = 31.7420043945;
+    a_delta[6][0] = 1.7427560091;
+    a_delta[6][1] = 7.33418560028;
+    a_delta[6][2] = 15.4683561325;
+    a_delta[6][3] = 26.5165843964;
+    a_delta[6][4] = 37.535987854;
+
+
+    a_alpha[0][0] = 0.598146140575;
+    a_alpha[0][1] = 0.578208088875;
+    a_alpha[0][2] = 0.535880565643;
+    a_alpha[0][3] = 0.552722096443;
+    a_alpha[0][4] = 0.578202664852;
+    a_alpha[1][0] = 1.35998690128;
+    a_alpha[1][1] = 1.33517253399;
+    a_alpha[1][2] = 1.28430593014;
+    a_alpha[1][3] = 1.24044024944;
+    a_alpha[1][4] = 1.20355796814;
+    a_alpha[2][0] = 1.85280632973;
+    a_alpha[2][1] = 1.8602206707;
+    a_alpha[2][2] = 1.78636014462;
+    a_alpha[2][3] = 1.7336935997;
+    a_alpha[2][4] = 1.67925310135;
+    a_alpha[3][0] = 2.18563699722;
+    a_alpha[3][1] = 2.19838356972;
+    a_alpha[3][2] = 2.13869380951;
+    a_alpha[3][3] = 2.07461500168;
+    a_alpha[3][4] = 1.96054816246;
+    a_alpha[4][0] = 2.66806054115;
+    a_alpha[4][1] = 2.46829032898;
+    a_alpha[4][2] = 2.36234903336;
+    a_alpha[4][3] = 2.26285719872;
+    a_alpha[4][4] = 2.12015795708;
+    a_alpha[5][0] = 2.88549137115;
+    a_alpha[5][1] = 2.63377022743;
+    a_alpha[5][2] = 2.46883964539;
+    a_alpha[5][3] = 2.30901432037;
+    a_alpha[5][4] = 2.18072772026;
+    a_alpha[6][0] = 4.01096820831;
+    a_alpha[6][1] = 3.22500920296;
+    a_alpha[6][2] = 3.07853531837;
+    a_alpha[6][3] = 2.73314976692;
+    a_alpha[6][4] = 2.48712253571;
+
+
+    a_beta[0][0] = 5.0;
+    a_beta[0][1] = 5.0;
+    a_beta[0][2] = 5.0;
+    a_beta[0][3] = 5.0;
+    a_beta[0][4] = 5.0;
+    a_beta[1][0] = 5.0;
+    a_beta[1][1] = 5.0;
+    a_beta[1][2] = 5.0;
+    a_beta[1][3] = 5.0;
+    a_beta[1][4] = 5.0;
+    a_beta[2][0] = 5.0;
+    a_beta[2][1] = 5.0;
+    a_beta[2][2] = 5.0;
+    a_beta[2][3] = 5.0;
+    a_beta[2][4] = 5.0;
+    a_beta[3][0] = 5.0;
+    a_beta[3][1] = 5.0;
+    a_beta[3][2] = 5.0;
+    a_beta[3][3] = 5.0;
+    a_beta[3][4] = 5.0;
+    a_beta[4][0] = 5.0;
+    a_beta[4][1] = 5.0;
+    a_beta[4][2] = 5.0;
+    a_beta[4][3] = 5.0;
+    a_beta[4][4] = 5.0;
+    a_beta[5][0] = 5.0;
+    a_beta[5][1] = 5.0;
+    a_beta[5][2] = 5.0;
+    a_beta[5][3] = 5.0;
+    a_beta[5][4] = 5.0;
+    a_beta[6][0] = 5.0;
+    a_beta[6][1] = 5.0;
+    a_beta[6][2] = 5.0;
+    a_beta[6][3] = 5.0;
+    a_beta[6][4] = 5.0;
+
+
+    a_r[0][0] = 2.42344376602e-05;
+    a_r[0][1] = 1.1623291357e-05;
+    a_r[0][2] = 7.65204003983e-06;
+    a_r[0][3] = 5.83182281844e-06;
+    a_r[0][4] = 4.40988515038e-06;
+    a_r[1][0] = 1.79161961569e-05;
+    a_r[1][1] = 9.16974022402e-06;
+    a_r[1][2] = 5.99601571594e-06;
+    a_r[1][3] = 4.60673072666e-06;
+    a_r[1][4] = 3.48981484422e-06;
+    a_r[2][0] = 1.22421797641e-05;
+    a_r[2][1] = 6.29486339676e-06;
+    a_r[2][2] = 4.21144795837e-06;
+    a_r[2][3] = 3.10019527205e-06;
+    a_r[2][4] = 2.44980742536e-06;
+    a_r[3][0] = 8.66732079885e-06;
+    a_r[3][1] = 4.37205198978e-06;
+    a_r[3][2] = 2.93707080345e-06;
+    a_r[3][3] = 2.25974667956e-06;
+    a_r[3][4] = 1.80137590178e-06;
+    a_r[4][0] = 5.94665698372e-06;
+    a_r[4][1] = 2.9800298762e-06;
+    a_r[4][2] = 2.08772257793e-06;
+    a_r[4][3] = 1.58348893819e-06;
+    a_r[4][4] = 1.34879110192e-06;
+    a_r[5][0] = 4.0092877498e-06;
+    a_r[5][1] = 2.09302174881e-06;
+    a_r[5][2] = 1.51016160999e-06;
+    a_r[5][3] = 1.20712650187e-06;
+    a_r[5][4] = 9.9290059552e-07;
+    a_r[6][0] = 2.70367399935e-06;
+    a_r[6][1] = 1.51722326791e-06;
+    a_r[6][2] = 1.14653687433e-06;
+    a_r[6][3] = 9.66354377852e-07;
+    a_r[6][4] = 8.75749890383e-07;
+
+
+    a_width[0][0] = 26.5976848602;
+    a_width[0][1] = 26.5976848602;
+    a_width[0][2] = 26.7212715149;
+    a_width[0][3] = 26.5424861908;
+    a_width[0][4] = 26.4101047516;
+    a_width[1][0] = 58.7029762268;
+    a_width[1][1] = 58.7029762268;
+    a_width[1][2] = 58.7458114624;
+    a_width[1][3] = 58.1389541626;
+    a_width[1][4] = 58.612991333;
+    a_width[2][0] = 103.93271637;
+    a_width[2][1] = 103.93271637;
+    a_width[2][2] = 103.803878784;
+    a_width[2][3] = 103.800476074;
+    a_width[2][4] = 103.74822998;
+    a_width[3][0] = 162.97102356;
+    a_width[3][1] = 162.97102356;
+    a_width[3][2] = 162.841094971;
+    a_width[3][3] = 162.802963257;
+    a_width[3][4] = 162.688156128;
+    a_width[4][0] = 235.570587158;
+    a_width[4][1] = 235.570587158;
+    a_width[4][2] = 235.355682373;
+    a_width[4][3] = 235.014694214;
+    a_width[4][4] = 235.070922852;
+    a_width[5][0] = 320.552429199;
+    a_width[5][1] = 320.552429199;
+    a_width[5][2] = 320.081390381;
+    a_width[5][3] = 319.721862793;
+    a_width[5][4] = 319.82611084;
+    a_width[6][0] = 416.118835449;
+    a_width[6][1] = 416.118835449;
+    a_width[6][2] = 430.821716309;
+    a_width[6][3] = 416.076812744;
+    a_width[6][4] = 415.9637146;
+
+  }
+  else {
+
+    a_delta[0][0] = 0.015081577003;
+    a_delta[0][1] = 0.0576512292027;
+    a_delta[0][2] = 0.131081297994;
+    a_delta[0][3] = 0.243380963802;
+    a_delta[0][4] = 0.39500105381;
+    a_delta[1][0] = 0.0972077324986;
+    a_delta[1][1] = 0.434791147709;
+    a_delta[1][2] = 0.861800074577;
+    a_delta[1][3] = 1.58613061905;
+    a_delta[1][4] = 2.41115784645;
+    a_delta[2][0] = 0.242783889174;
+    a_delta[2][1] = 0.827510118484;
+    a_delta[2][2] = 1.78883588314;
+    a_delta[2][3] = 3.17804527283;
+    a_delta[2][4] = 4.9168419838;
+    a_delta[3][0] = 0.368439763784;
+    a_delta[3][1] = 1.45783913136;
+    a_delta[3][2] = 3.27468585968;
+    a_delta[3][3] = 5.93577003479;
+    a_delta[3][4] = 9.49385356903;
+    a_delta[4][0] = 0.679009974003;
+    a_delta[4][1] = 2.96808123589;
+    a_delta[4][2] = 6.60964488983;
+    a_delta[4][3] = 11.7470684052;
+    a_delta[4][4] = 18.1083869934;
+    a_delta[5][0] = 1.51261091232;
+    a_delta[5][1] = 5.85586261749;
+    a_delta[5][2] = 12.3102693558;
+    a_delta[5][3] = 21.393032074;
+    a_delta[5][4] = 31.7420043945;
+    a_delta[6][0] = 1.7427560091;
+    a_delta[6][1] = 7.33418560028;
+    a_delta[6][2] = 15.4683561325;
+    a_delta[6][3] = 26.5165843964;
+    a_delta[6][4] = 37.535987854;
+
+
+    a_alpha[0][0] = 0.693464934826;
+    a_alpha[0][1] = 0.764990329742;
+    a_alpha[0][2] = 0.725805997849;
+    a_alpha[0][3] = 0.772053778172;
+    a_alpha[0][4] = 0.747024357319;
+    a_alpha[1][0] = 1.3640486002;
+    a_alpha[1][1] = 1.3855907917;
+    a_alpha[1][2] = 1.32408082485;
+    a_alpha[1][3] = 1.28046572208;
+    a_alpha[1][4] = 1.25549399853;
+    a_alpha[2][0] = 1.75767993927;
+    a_alpha[2][1] = 1.73263728619;
+    a_alpha[2][2] = 1.71535384655;
+    a_alpha[2][3] = 1.61282861233;
+    a_alpha[2][4] = 1.5456840992;
+    a_alpha[3][0] = 1.97163009644;
+    a_alpha[3][1] = 1.95817959309;
+    a_alpha[3][2] = 1.93145811558;
+    a_alpha[3][3] = 1.84361171722;
+    a_alpha[3][4] = 1.74427652359;
+    a_alpha[4][0] = 2.38409137726;
+    a_alpha[4][1] = 2.25097537041;
+    a_alpha[4][2] = 2.11196112633;
+    a_alpha[4][3] = 2.01256418228;
+    a_alpha[4][4] = 1.83331000805;
+    a_alpha[5][0] = 2.666233778;
+    a_alpha[5][1] = 2.43228340149;
+    a_alpha[5][2] = 2.22717642784;
+    a_alpha[5][3] = 2.09035038948;
+    a_alpha[5][4] = 1.91368079185;
+    a_alpha[6][0] = 2.98137307167;
+    a_alpha[6][1] = 2.68790650368;
+    a_alpha[6][2] = 2.48271894455;
+    a_alpha[6][3] = 2.61428976059;
+    a_alpha[6][4] = 2.04934287071;
+
+
+    a_beta[0][0] = 5.0;
+    a_beta[0][1] = 5.0;
+    a_beta[0][2] = 5.0;
+    a_beta[0][3] = 5.0;
+    a_beta[0][4] = 5.0;
+    a_beta[1][0] = 5.0;
+    a_beta[1][1] = 5.0;
+    a_beta[1][2] = 5.0;
+    a_beta[1][3] = 5.0;
+    a_beta[1][4] = 5.0;
+    a_beta[2][0] = 5.0;
+    a_beta[2][1] = 5.0;
+    a_beta[2][2] = 5.0;
+    a_beta[2][3] = 5.0;
+    a_beta[2][4] = 5.0;
+    a_beta[3][0] = 5.0;
+    a_beta[3][1] = 5.0;
+    a_beta[3][2] = 5.0;
+    a_beta[3][3] = 5.0;
+    a_beta[3][4] = 5.0;
+    a_beta[4][0] = 5.0;
+    a_beta[4][1] = 5.0;
+    a_beta[4][2] = 5.0;
+    a_beta[4][3] = 5.0;
+    a_beta[4][4] = 5.0;
+    a_beta[5][0] = 5.0;
+    a_beta[5][1] = 5.0;
+    a_beta[5][2] = 5.0;
+    a_beta[5][3] = 5.0;
+    a_beta[5][4] = 5.0;
+    a_beta[6][0] = 5.0;
+    a_beta[6][1] = 5.0;
+    a_beta[6][2] = 5.0;
+    a_beta[6][3] = 5.0;
+    a_beta[6][4] = 5.0;
+
+
+    a_r[0][0] = 2.2784628527e-05;
+    a_r[0][1] = 1.20308704936e-05;
+    a_r[0][2] = 8.08533604868e-06;
+    a_r[0][3] = 5.96977088207e-06;
+    a_r[0][4] = 4.75232536701e-06;
+    a_r[1][0] = 1.79455546458e-05;
+    a_r[1][1] = 9.10651215236e-06;
+    a_r[1][2] = 5.98334918323e-06;
+    a_r[1][3] = 4.73274121759e-06;
+    a_r[1][4] = 3.70004795514e-06;
+    a_r[2][0] = 1.22285728139e-05;
+    a_r[2][1] = 6.1476503106e-06;
+    a_r[2][2] = 4.39912128058e-06;
+    a_r[2][3] = 3.30409216076e-06;
+    a_r[2][4] = 2.65621315521e-06;
+    a_r[3][0] = 8.09348966868e-06;
+    a_r[3][1] = 4.27752138421e-06;
+    a_r[3][2] = 2.96758730656e-06;
+    a_r[3][3] = 2.29305896937e-06;
+    a_r[3][4] = 1.8912643327e-06;
+    a_r[4][0] = 5.57275279789e-06;
+    a_r[4][1] = 3.00000010611e-06;
+    a_r[4][2] = 2.09141035157e-06;
+    a_r[4][3] = 1.65903634297e-06;
+    a_r[4][4] = 1.38937730298e-06;
+    a_r[5][0] = 3.85146495319e-06;
+    a_r[5][1] = 1.99999999495e-06;
+    a_r[5][2] = 1.47301966535e-06;
+    a_r[5][3] = 1.27019291085e-06;
+    a_r[5][4] = 1.09771178813e-06;
+    a_r[6][0] = 2.4772159577e-06;
+    a_r[6][1] = 1.43584577472e-06;
+    a_r[6][2] = 1.08408983124e-06;
+    a_r[6][3] = 1.03147738173e-06;
+    a_r[6][4] = 8.84041753579e-07;
+
+
+    a_width[0][0] = 26.5976848602;
+    a_width[0][1] = 26.5976848602;
+    a_width[0][2] = 26.6827316284;
+    a_width[0][3] = 26.6214389801;
+    a_width[0][4] = 26.3873176575;
+    a_width[1][0] = 58.7029762268;
+    a_width[1][1] = 58.7029762268;
+    a_width[1][2] = 58.8415145874;
+    a_width[1][3] = 58.4030990601;
+    a_width[1][4] = 58.6177330017;
+    a_width[2][0] = 103.93271637;
+    a_width[2][1] = 103.93271637;
+    a_width[2][2] = 104.202682495;
+    a_width[2][3] = 103.806724548;
+    a_width[2][4] = 103.740852356;
+    a_width[3][0] = 162.97102356;
+    a_width[3][1] = 162.97102356;
+    a_width[3][2] = 162.97102356;
+    a_width[3][3] = 162.682937622;
+    a_width[3][4] = 162.612564087;
+    a_width[4][0] = 235.570587158;
+    a_width[4][1] = 235.570587158;
+    a_width[4][2] = 235.356552124;
+    a_width[4][3] = 234.996078491;
+    a_width[4][4] = 235.060302734;
+    a_width[5][0] = 320.552429199;
+    a_width[5][1] = 320.552429199;
+    a_width[5][2] = 344.464599609;
+    a_width[5][3] = 320.296142578;
+    a_width[5][4] = 320.367614746;
+    a_width[6][0] = 416.118835449;
+    a_width[6][1] = 416.118835449;
+    a_width[6][2] = 464.375823975;
+    a_width[6][3] = 455.52545166;
+    a_width[6][4] = 415.974060059;
+    
+  }
+
+  delete gDirectory->FindObject("h2_width");
+  delete gDirectory->FindObject("h2_delta");
+  delete gDirectory->FindObject("h2_alpha");
+  delete gDirectory->FindObject("h2_r");
+  delete gDirectory->FindObject("h2_beta");
+
+  TH2F* h2_width;
+  TH2F* h2_delta;
+  TH2F* h2_alpha;
+  TH2F* h2_r;
+  TH2F* h2_beta;
+
+  h2_width = new TH2F("h2_width","width parameters",7,350.,1050.,5,0.1,1.1);
+  h2_delta = new TH2F("h2_delta","delta parameters",7,350.,1050.,5,0.1,1.1);
+  h2_alpha = new TH2F("h2_alpha","alpha parameters",7,350.,1050.,5,0.1,1.1);
+  h2_r     = new TH2F("h2_r","r parameters",7,350.,1050.,5,0.1,1.1);
+  h2_beta  = new TH2F("h2_beta","beta parameters",7,350.,1050.,5,0.1,1.1);
+
+  for (Int_t iBinX = 1; iBinX <= h2_width->GetNbinsX(); ++iBinX){
+    for (Int_t iBinY = 1; iBinY <= h2_width->GetNbinsY(); ++iBinY) {
+      h2_width->SetBinContent(iBinX,iBinY,a_width[iBinX-1][iBinY-1]);      
+      h2_delta->SetBinContent(iBinX,iBinY,a_delta[iBinX-1][iBinY-1]);      
+      h2_alpha->SetBinContent(iBinX,iBinY,a_alpha[iBinX-1][iBinY-1]);      
+      h2_r->SetBinContent(iBinX,iBinY,a_r[iBinX-1][iBinY-1]);      
+      h2_beta->SetBinContent(iBinX,iBinY,a_beta[iBinX-1][iBinY-1]);      
+    }
+  }
+
+  effKPrime = KPrime/(1-BRnew);
+  width = h2_width->Interpolate(mH,effKPrime);
+  alpha = h2_alpha->Interpolate(mH,effKPrime);
+  delta = h2_delta->Interpolate(mH,effKPrime);
+  r     = h2_r->Interpolate(mH,effKPrime);
+  beta  = h2_beta->Interpolate(mH,effKPrime);
+
+  
+}
+
+
+
+
+Double_t RooBWHighMassGGH::Spline(Double_t xx) const{
+   const int fNp = 20, fKstep = 0;
+   const double fDelta = -1, fXmin = 200, fXmax = 2150;
+   const double fX[20] = { 200, 250, 300, 350, 400,
+                        450, 500, 550, 600, 650,
+                        750, 850, 950, 1050, 1150,
+                        1350, 1550, 1750, 1950, 2150 };
+   const double fY[20] = { 0.139988, 0.17804, 0.352505, 0.801982, 1.35134,
+                        1.75174, 1.84163, 1.86637, 1.78052, 1.7297,
+                        1.53036, 1.31241, 1.11751, 0.946671, 0.812524,
+                        0.640316, 0.490843, 0.396263, 0.315344, 0.210836 };
+   const double fB[20] = { 0.000266891, 0.00147333, 0.00628998, 0.0108012, 0.0105333,
+                        0.00444666, 0.000737389, -0.000594766, -0.00180599, -0.000721876,
+                        -0.00269494, -0.00186614, -0.00192752, -0.00150674, -0.00115716,
+                        -0.000743197, -0.000649875, -0.000369596, -0.000461366, -0.000583113 };
+   const double fC[20] = { 8.42921e-06, 2.29701e-05, 6.55918e-05, 1.67598e-05, -2.50909e-05,
+                        -7.98341e-05, 4.46636e-06, -3.60991e-05, 1.78298e-05, -7.22121e-06,
+                        3.25258e-06, -4.32435e-07, 1.81479e-06, 1.62255e-06, 2.04841e-06,
+                        -2.33522e-07, 1.01254e-06, 5.76421e-08, -3.11836e-07, -3.01879e-07 };
+   const double fD[20] = { 0, 2.90818e-07, -2.00191e-08, -3.34947e-07, -4.53847e-07,
+                        2.18457e-07, 1.71166e-07, -2.84202e-08, 2.09784e-07, -2.33159e-07,
+                        8.20808e-08, -2.72765e-08, 1.26473e-08, -2.76285e-09, 7.40335e-10,
+                        -1.80875e-09, 1.31533e-09, -1.99675e-09, 4.97867e-11, 0 };
+   const double fE[20] = { 0, 2.90818e-09, -6.01655e-09, 2.86727e-09, -4.05627e-09,
+                        1.07793e-08, -1.12522e-08, 9.25635e-09, -6.87431e-09, 2.44487e-09,
+                        -8.68676e-10, 3.2189e-10, -1.22271e-10, 4.52199e-11, -2.77039e-11,
+                        2.13312e-11, -1.3521e-11, 5.24081e-12, -1.24467e-13, 0 };
+   const double fF[20] = { 1.16327e-11, -3.56989e-11, 3.55353e-11, -2.76942e-11, 5.93423e-11,
+                        -8.81261e-11, 8.20343e-11, -6.45226e-11, 3.72767e-11, -6.6271e-12,
+                        2.38113e-12, -8.8832e-13, 3.34981e-13, -1.45848e-13, 4.90352e-14,
+                        -3.48522e-14, 1.87618e-14, -5.36528e-15, 1.24467e-16, 0 };
+   int klow=0;
+   if(xx<=fXmin) klow=0;
+   else if(xx>=fXmax) klow=fNp-1;
+   else {
+     if(fKstep) {
+       // Equidistant knots, use histogramming
+       klow = int((xx-fXmin)/fDelta);
+       if (klow < fNp-1) klow = fNp-1;
+     } else {
+       int khig=fNp-1, khalf;
+       // Non equidistant knots, binary search
+       while(khig-klow>1)
+         if(xx>fX[khalf=(klow+khig)/2]) klow=khalf;
+         else khig=khalf;
+     }
+   }
+   // Evaluate now
+   double dx=xx-fX[klow];
+   return (fY[klow]+dx*(fB[klow]+dx*(fC[klow]+dx*(fD[klow]+dx*(fE[klow]+dx*fF[klow])))));
+}
+
+
+
+/*************RooBWHighMassVBF***********/
+ClassImp(RooBWHighMassVBF) 
+
+ RooBWHighMassVBF::RooBWHighMassVBF(){}
+
+ RooBWHighMassVBF::RooBWHighMassVBF(const char *name, const char *title, 
+                        RooAbsReal& _x,
+                        RooAbsReal& _mH,
+			RooAbsReal& _KPrime,
+			RooAbsReal& _BRnew,
+			Bool_t is8TeV_b) :
+   RooAbsPdf(name,title), 
+   x("x","x",this,_x),
+   mH("mH","mH",this,_mH),
+   KPrime("KPrime","KPrime",this,_KPrime),
+   BRnew("BRnew","BRnew",this,_BRnew),
+   is8TeV(is8TeV_b)
+ { 
+   
+   setPars();
+
+ } 
+
+
+ RooBWHighMassVBF::RooBWHighMassVBF(const RooBWHighMassVBF& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   x("x",this,other.x),
+   mH("mH",this,other.mH),
+   KPrime("KPrime",this,other.KPrime),
+   BRnew("BRnew",this,other.BRnew),
+   is8TeV(other.is8TeV),
+   effKPrime(other.effKPrime),
+   width(other.width),
+   delta(other.delta),
+   alpha(other.alpha),
+   r(other.r),
+   beta(other.beta)
+ { 
+ } 
+
+
+
+ Double_t RooBWHighMassVBF::evaluate() const 
+ {    
+
+
+
+   Double_t bwHM = x / ( TMath::Power( TMath::Power(x,2) - TMath::Power(mH+delta,2) , 2 ) + TMath::Power(x,2)*TMath::Power(effKPrime*width,2) ); 
+
+   Double_t signal = bwHM;
+     
+   Double_t k=0.25;
+   Double_t mH_eff = mH*TMath::Sqrt(1-k*(effKPrime*width/mH)*(effKPrime*width/mH));
+   TComplex MSquared(mH_eff*mH_eff,-effKPrime*width*mH_eff);
+   TComplex M = MSquared.Sqrt(MSquared);
+   TComplex Exp1 = MSquared.Exp((TComplex)alpha);
+   TComplex Exp2 = MSquared.Exp(-(TComplex)alpha);
+   TComplex Exp3 = MSquared.Exp(-x*(TComplex)alpha/M);
+
+   double interference = -r*(1-TMath::Exp(-beta*(x-150.)/mH_eff))*((Exp1/(x-M)-Exp2/(x+M))*Exp3).Re();
+
+   return signal + interference/( TMath::Sqrt(1-BRnew) );
+   
+   
+ } 
+
+
+
+
+void RooBWHighMassVBF::setPars() {
+
+  Double_t a_width[7][5];
+  Double_t a_delta[7][5];
+  Double_t a_alpha[7][5];
+  Double_t a_r[7][5];
+  Double_t a_beta[7][5];
+
+  if (is8TeV){
+
+    a_delta[0][0] = -0.0427226908505;
+    a_delta[0][1] = 0.216055706143;
+    a_delta[0][2] = 0.561093568802;
+    a_delta[0][3] = 0.357789009809;
+    a_delta[0][4] = 0.205310583115;
+    a_delta[1][0] = -0.150665313005;
+    a_delta[1][1] = 0.703190743923;
+    a_delta[1][2] = 1.84166550636;
+    a_delta[1][3] = 1.40323352814;
+    a_delta[1][4] = 1.07440948486;
+    a_delta[2][0] = -0.331646800041;
+    a_delta[2][1] = 1.8840212822;
+    a_delta[2][2] = 4.83824539185;
+    a_delta[2][3] = 4.45025062561;
+    a_delta[2][4] = 4.15925455093;
+    a_delta[3][0] = -0.858169019222;
+    a_delta[3][1] = 1.57711386681;
+    a_delta[3][2] = 4.82415771484;
+    a_delta[3][3] = 4.92491388321;
+    a_delta[3][4] = 5.00048112869;
+    a_delta[4][0] = -1.77382862568;
+    a_delta[4][1] = 2.90320134163;
+    a_delta[4][2] = 9.13924121857;
+    a_delta[4][3] = 8.15418815613;
+    a_delta[4][4] = 7.41539764404;
+    a_delta[5][0] = -4.02816152573;
+    a_delta[5][1] = 1.704387784;
+    a_delta[5][2] = 9.34778690338;
+    a_delta[5][3] = 12.1166524887;
+    a_delta[5][4] = 14.1933021545;
+    a_delta[6][0] = -7.65377569199;
+    a_delta[6][1] = -9.65631866455;
+    a_delta[6][2] = -12.3263750076;
+    a_delta[6][3] = 1.1465177536;
+    a_delta[6][4] = 11.2511873245;
+
+
+    a_alpha[0][0] = 0.563147187233;
+    a_alpha[0][1] = 0.45893239975;
+    a_alpha[0][2] = 0.319979339838;
+    a_alpha[0][3] = 0.551294088364;
+    a_alpha[0][4] = 0.724780201912;
+    a_alpha[1][0] = 0.547509074211;
+    a_alpha[1][1] = 1.36613070965;
+    a_alpha[1][2] = 2.45762634277;
+    a_alpha[1][3] = 1.43544137478;
+    a_alpha[1][4] = 0.66880261898;
+    a_alpha[2][0] = 0.602083981037;
+    a_alpha[2][1] = 1.06946384907;
+    a_alpha[2][2] = 1.69263708591;
+    a_alpha[2][3] = 1.20996487141;
+    a_alpha[2][4] = 0.847960710526;
+    a_alpha[3][0] = 0.607508063316;
+    a_alpha[3][1] = 0.777938187122;
+    a_alpha[3][2] = 1.00517833233;
+    a_alpha[3][3] = 0.887783586979;
+    a_alpha[3][4] = 0.79973757267;
+    a_alpha[4][0] = 0.66455245018;
+    a_alpha[4][1] = 0.994981110096;
+    a_alpha[4][2] = 1.43555271626;
+    a_alpha[4][3] = 1.08329284191;
+    a_alpha[4][4] = 0.819097995758;
+    a_alpha[5][0] = 0.662972033024;
+    a_alpha[5][1] = 0.885914742947;
+    a_alpha[5][2] = 1.18317174911;
+    a_alpha[5][3] = 1.08625233173;
+    a_alpha[5][4] = 1.01356267929;
+    a_alpha[6][0] = 0.581967771053;
+    a_alpha[6][1] = 0.762473225594;
+    a_alpha[6][2] = 1.00314712524;
+    a_alpha[6][3] = 0.950977981091;
+    a_alpha[6][4] = 0.911851108074;
+
+
+    a_beta[0][0] = 5.0;
+    a_beta[0][1] = 5.0;
+    a_beta[0][2] = 5.0;
+    a_beta[0][3] = 5.0;
+    a_beta[0][4] = 5.0;
+    a_beta[1][0] = 5.0;
+    a_beta[1][1] = 5.0;
+    a_beta[1][2] = 5.0;
+    a_beta[1][3] = 5.0;
+    a_beta[1][4] = 5.0;
+    a_beta[2][0] = 5.0;
+    a_beta[2][1] = 5.0;
+    a_beta[2][2] = 5.0;
+    a_beta[2][3] = 5.0;
+    a_beta[2][4] = 5.0;
+    a_beta[3][0] = 5.0;
+    a_beta[3][1] = 5.0;
+    a_beta[3][2] = 5.0;
+    a_beta[3][3] = 5.0;
+    a_beta[3][4] = 5.0;
+    a_beta[4][0] = 5.0;
+    a_beta[4][1] = 5.0;
+    a_beta[4][2] = 5.0;
+    a_beta[4][3] = 5.0;
+    a_beta[4][4] = 5.0;
+    a_beta[5][0] = 5.0;
+    a_beta[5][1] = 5.0;
+    a_beta[5][2] = 5.0;
+    a_beta[5][3] = 5.0;
+    a_beta[5][4] = 5.0;
+    a_beta[6][0] = 5.0;
+    a_beta[6][1] = 5.0;
+    a_beta[6][2] = 5.0;
+    a_beta[6][3] = 5.0;
+    a_beta[6][4] = 5.0;
+
+
+    a_r[0][0] = 1.48205072037e-05;
+    a_r[0][1] = 1.1186062693e-05;
+    a_r[0][2] = 6.34013758827e-06;
+    a_r[0][3] = 3.83974474971e-06;
+    a_r[0][4] = 1.96445012079e-06;
+    a_r[1][0] = 9.00775739865e-06;
+    a_r[1][1] = 6.94043365002e-06;
+    a_r[1][2] = 4.18400168201e-06;
+    a_r[1][3] = 2.76985815617e-06;
+    a_r[1][4] = 1.70925045495e-06;
+    a_r[2][0] = 6.04698425377e-06;
+    a_r[2][1] = 4.75644401376e-06;
+    a_r[2][2] = 3.03572392113e-06;
+    a_r[2][3] = 2.13412045014e-06;
+    a_r[2][4] = 1.45791784689e-06;
+    a_r[3][0] = 4.69023598271e-06;
+    a_r[3][1] = 3.53314635504e-06;
+    a_r[3][2] = 1.99036026061e-06;
+    a_r[3][3] = 1.4772575696e-06;
+    a_r[3][4] = 1.09243046609e-06;
+    a_r[4][0] = 3.4880408748e-06;
+    a_r[4][1] = 2.75083175438e-06;
+    a_r[4][2] = 1.76788603312e-06;
+    a_r[4][3] = 1.27152429741e-06;
+    a_r[4][4] = 8.9925293878e-07;
+    a_r[5][0] = 3.07998561766e-06;
+    a_r[5][1] = 2.3134514322e-06;
+    a_r[5][2] = 1.29140562422e-06;
+    a_r[5][3] = 1.00531622138e-06;
+    a_r[5][4] = 7.90749197677e-07;
+    a_r[6][0] = 2.2942472242e-06;
+    a_r[6][1] = 1.74261015218e-06;
+    a_r[6][2] = 1.00709394246e-06;
+    a_r[6][3] = 7.8950841953e-07;
+    a_r[6][4] = 6.2631926312e-07;
+
+
+    a_width[0][0] = 29.4034500122;
+    a_width[0][1] = 29.3192157745;
+    a_width[0][2] = 29.2069015503;
+    a_width[0][3] = 29.2759666443;
+    a_width[0][4] = 29.3277645111;
+    a_width[1][0] = 68.2420043945;
+    a_width[1][1] = 67.6313476562;
+    a_width[1][2] = 66.8171310425;
+    a_width[1][3] = 66.8436508179;
+    a_width[1][4] = 66.86353302;
+    a_width[2][0] = 124.135383606;
+    a_width[2][1] = 121.3673172;
+    a_width[2][2] = 117.676567078;
+    a_width[2][3] = 117.647674561;
+    a_width[2][4] = 117.625999451;
+    a_width[3][0] = 200.977294922;
+    a_width[3][1] = 194.373504639;
+    a_width[3][2] = 185.568450928;
+    a_width[3][3] = 186.712692261;
+    a_width[3][4] = 187.570861816;
+    a_width[4][0] = 307.858123779;
+    a_width[4][1] = 290.351104736;
+    a_width[4][2] = 267.008392334;
+    a_width[4][3] = 270.691131592;
+    a_width[4][4] = 273.453186035;
+    a_width[5][0] = 472.236175537;
+    a_width[5][1] = 456.160430908;
+    a_width[5][2] = 434.726135254;
+    a_width[5][3] = 419.668457031;
+    a_width[5][4] = 408.375213623;
+    a_width[6][0] = 678.626281738;
+    a_width[6][1] = 679.404174805;
+    a_width[6][2] = 680.44128418;
+    a_width[6][3] = 629.717468262;
+    a_width[6][4] = 591.674621582;
+
+  }
+  else {
+
+
+    a_delta[0][0] = -0.0467488355935;
+    a_delta[0][1] = 0.186962202191;
+    a_delta[0][2] = 0.498576909304;
+    a_delta[0][3] = 0.341332376003;
+    a_delta[0][4] = 0.223398953676;
+    a_delta[1][0] = -0.169629260898;
+    a_delta[1][1] = 0.631577551365;
+    a_delta[1][2] = 1.69985330105;
+    a_delta[1][3] = 1.11659288406;
+    a_delta[1][4] = 0.679147660732;
+    a_delta[2][0] = -0.493037968874;
+    a_delta[2][1] = 1.42144858837;
+    a_delta[2][2] = 3.97409725189;
+    a_delta[2][3] = 3.15663647652;
+    a_delta[2][4] = 2.54354095459;
+    a_delta[3][0] = -0.84842646122;
+    a_delta[3][1] = 1.05204308033;
+    a_delta[3][2] = 3.58600258827;
+    a_delta[3][3] = 3.14975547791;
+    a_delta[3][4] = 2.82257032394;
+    a_delta[4][0] = -2.11093139648;
+    a_delta[4][1] = 1.7276955843;
+    a_delta[4][2] = 6.8458647728;
+    a_delta[4][3] = 5.54416179657;
+    a_delta[4][4] = 4.56788492203;
+    a_delta[5][0] = -4.30393457413;
+    a_delta[5][1] = -0.170722618699;
+    a_delta[5][2] = 5.34022665024;
+    a_delta[5][3] = 7.45445728302;
+    a_delta[5][4] = 9.04013061523;
+    a_delta[6][0] = -16.372549057;
+    a_delta[6][1] = -17.2422771454;
+    a_delta[6][2] = -18.4019145966;
+    a_delta[6][3] = -11.1890583038;
+    a_delta[6][4] = -5.77941560745;
+
+
+    a_alpha[0][0] = 0.599365830421;
+    a_alpha[0][1] = 1.28643023968;
+    a_alpha[0][2] = 2.20251607895;
+    a_alpha[0][3] = 2.33212184906;
+    a_alpha[0][4] = 2.42932629585;
+    a_alpha[1][0] = 0.598161041737;
+    a_alpha[1][1] = 1.40351164341;
+    a_alpha[1][2] = 2.47731232643;
+    a_alpha[1][3] = 1.42528343201;
+    a_alpha[1][4] = 0.636261820793;
+    a_alpha[2][0] = 0.618717312813;
+    a_alpha[2][1] = 0.999420404434;
+    a_alpha[2][2] = 1.5070245266;
+    a_alpha[2][3] = 1.08608257771;
+    a_alpha[2][4] = 0.77037602663;
+    a_alpha[3][0] = 0.650398313999;
+    a_alpha[3][1] = 0.805517792702;
+    a_alpha[3][2] = 1.01234376431;
+    a_alpha[3][3] = 0.854822576046;
+    a_alpha[3][4] = 0.736681640148;
+    a_alpha[4][0] = 0.736925065517;
+    a_alpha[4][1] = 1.17594432831;
+    a_alpha[4][2] = 1.76130342484;
+    a_alpha[4][3] = 1.18785488605;
+    a_alpha[4][4] = 0.757768571377;
+    a_alpha[5][0] = 0.552518367767;
+    a_alpha[5][1] = 0.795399546623;
+    a_alpha[5][2] = 1.11924111843;
+    a_alpha[5][3] = 1.04145979881;
+    a_alpha[5][4] = 0.983123779297;
+    a_alpha[6][0] = 2.99997997284;
+    a_alpha[6][1] = 2.56897091866;
+    a_alpha[6][2] = 1.99429225922;
+    a_alpha[6][3] = 1.30165791512;
+    a_alpha[6][4] = 0.782182216644;
+
+
+    a_beta[0][0] = 5.0;
+    a_beta[0][1] = 5.0;
+    a_beta[0][2] = 5.0;
+    a_beta[0][3] = 5.0;
+    a_beta[0][4] = 5.0;
+    a_beta[1][0] = 5.0;
+    a_beta[1][1] = 5.0;
+    a_beta[1][2] = 5.0;
+    a_beta[1][3] = 5.0;
+    a_beta[1][4] = 5.0;
+    a_beta[2][0] = 5.0;
+    a_beta[2][1] = 5.0;
+    a_beta[2][2] = 5.0;
+    a_beta[2][3] = 5.0;
+    a_beta[2][4] = 5.0;
+    a_beta[3][0] = 5.0;
+    a_beta[3][1] = 5.0;
+    a_beta[3][2] = 5.0;
+    a_beta[3][3] = 5.0;
+    a_beta[3][4] = 5.0;
+    a_beta[4][0] = 5.0;
+    a_beta[4][1] = 5.0;
+    a_beta[4][2] = 5.0;
+    a_beta[4][3] = 5.0;
+    a_beta[4][4] = 5.0;
+    a_beta[5][0] = 5.0;
+    a_beta[5][1] = 5.0;
+    a_beta[5][2] = 5.0;
+    a_beta[5][3] = 5.0;
+    a_beta[5][4] = 5.0;
+    a_beta[6][0] = 5.0;
+    a_beta[6][1] = 5.0;
+    a_beta[6][2] = 5.0;
+    a_beta[6][3] = 5.0;
+    a_beta[6][4] = 5.0;
+
+
+    a_r[0][0] = 1.48545586853e-05;
+    a_r[0][1] = 1.12660254672e-05;
+    a_r[0][2] = 6.48131481285e-06;
+    a_r[0][3] = 4.02921614295e-06;
+    a_r[0][4] = 2.19014191316e-06;
+    a_r[1][0] = 8.97625341167e-06;
+    a_r[1][1] = 6.94108803145e-06;
+    a_r[1][2] = 4.22753373641e-06;
+    a_r[1][3] = 2.84315092358e-06;
+    a_r[1][4] = 1.80486370027e-06;
+    a_r[2][0] = 6.22794505034e-06;
+    a_r[2][1] = 4.88487876282e-06;
+    a_r[2][2] = 3.09412416755e-06;
+    a_r[2][3] = 2.20998913392e-06;
+    a_r[2][4] = 1.54688768816e-06;
+    a_r[3][0] = 4.69899123345e-06;
+    a_r[3][1] = 3.56410055247e-06;
+    a_r[3][2] = 2.05091282623e-06;
+    a_r[3][3] = 1.53963389948e-06;
+    a_r[3][4] = 1.156174676e-06;
+    a_r[4][0] = 3.56752138941e-06;
+    a_r[4][1] = 2.82789937955e-06;
+    a_r[4][2] = 1.84173666185e-06;
+    a_r[4][3] = 1.3506733012e-06;
+    a_r[4][4] = 9.82375695457e-07;
+    a_r[5][0] = 3.13103350891e-06;
+    a_r[5][1] = 2.36991559177e-06;
+    a_r[5][2] = 1.35509151278e-06;
+    a_r[5][3] = 1.06508832687e-06;
+    a_r[5][4] = 8.47585965857e-07;
+    a_r[6][0] = 2.70667965196e-06;
+    a_r[6][1] = 2.03815511668e-06;
+    a_r[6][2] = 1.14678891805e-06;
+    a_r[6][3] = 8.97115910448e-07;
+    a_r[6][4] = 7.09861126325e-07;
+
+
+    a_width[0][0] = 29.4140872955;
+    a_width[0][1] = 29.277048111;
+    a_width[0][2] = 29.0943260193;
+    a_width[0][3] = 29.2809848785;
+    a_width[0][4] = 29.4209804535;
+    a_width[1][0] = 68.481918335;
+    a_width[1][1] = 67.7382736206;
+    a_width[1][2] = 66.7467498779;
+    a_width[1][3] = 66.8006973267;
+    a_width[1][4] = 66.8411560059;
+    a_width[2][0] = 123.914558411;
+    a_width[2][1] = 121.278839111;
+    a_width[2][2] = 117.764556885;
+    a_width[2][3] = 117.938232422;
+    a_width[2][4] = 118.068481445;
+    a_width[3][0] = 202.195083618;
+    a_width[3][1] = 197.77684021;
+    a_width[3][2] = 191.885848999;
+    a_width[3][3] = 191.631271362;
+    a_width[3][4] = 191.440338135;
+    a_width[4][0] = 317.213806152;
+    a_width[4][1] = 304.805541992;
+    a_width[4][2] = 288.261230469;
+    a_width[4][3] = 290.44052124;
+    a_width[4][4] = 292.074981689;
+    a_width[5][0] = 468.232727051;
+    a_width[5][1] = 459.477325439;
+    a_width[5][2] = 447.803405762;
+    a_width[5][3] = 437.50869751;
+    a_width[5][4] = 429.787658691;
+    a_width[6][0] = 688.913818359;
+    a_width[6][1] = 679.816223145;
+    a_width[6][2] = 667.686035156;
+    a_width[6][3] = 641.49987793;
+    a_width[6][4] = 621.860229492;
+    
+  }
+
+  delete gDirectory->FindObject("h2_width");
+  delete gDirectory->FindObject("h2_delta");
+  delete gDirectory->FindObject("h2_alpha");
+  delete gDirectory->FindObject("h2_r");
+  delete gDirectory->FindObject("h2_beta");
+
+  TH2F* h2_width;
+  TH2F* h2_delta;
+  TH2F* h2_alpha;
+  TH2F* h2_r;
+  TH2F* h2_beta;
+
+  h2_width = new TH2F("h2_width","width parameters",7,350.,1050.,5,0.1,1.1);
+  h2_delta = new TH2F("h2_delta","delta parameters",7,350.,1050.,5,0.1,1.1);
+  h2_alpha = new TH2F("h2_alpha","alpha parameters",7,350.,1050.,5,0.1,1.1);
+  h2_r     = new TH2F("h2_r","r parameters",7,350.,1050.,5,0.1,1.1);
+  h2_beta  = new TH2F("h2_beta","beta parameters",7,350.,1050.,5,0.1,1.1);
+
+  for (Int_t iBinX = 1; iBinX <= h2_width->GetNbinsX(); ++iBinX){
+    for (Int_t iBinY = 1; iBinY <= h2_width->GetNbinsY(); ++iBinY) {
+      h2_width->SetBinContent(iBinX,iBinY,a_width[iBinX-1][iBinY-1]);      
+      h2_delta->SetBinContent(iBinX,iBinY,a_delta[iBinX-1][iBinY-1]);      
+      h2_alpha->SetBinContent(iBinX,iBinY,a_alpha[iBinX-1][iBinY-1]);      
+      h2_r->SetBinContent(iBinX,iBinY,a_r[iBinX-1][iBinY-1]);      
+      h2_beta->SetBinContent(iBinX,iBinY,a_beta[iBinX-1][iBinY-1]);      
+    }
+  }
+
+  effKPrime = KPrime/(1-BRnew);
+  width = h2_width->Interpolate(mH,effKPrime);
+  alpha = h2_alpha->Interpolate(mH,effKPrime);
+  delta = h2_delta->Interpolate(mH,effKPrime);
+  r     = h2_r->Interpolate(mH,effKPrime);
+  beta  = h2_beta->Interpolate(mH,effKPrime);
+
+  
+}
+
+
+
+
+
 /*************RooSigPlusInt***********/
 ClassImp(RooSigPlusInt) 
 

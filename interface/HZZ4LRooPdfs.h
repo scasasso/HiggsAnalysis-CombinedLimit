@@ -7,6 +7,9 @@
 #include "RooAbsReal.h"
 #include "RooAbsCategory.h"
 
+#include "TDirectory.h"
+#include "TH2F.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -731,6 +734,91 @@ class RooaDoubleCBxBW : public RooAbsPdf {
 
   ClassDef(RooaDoubleCBxBW,1)
     };
+
+
+
+///////////////////////////////////////////////////
+class RooBWHighMassGGH : public RooAbsPdf {
+public:
+  RooBWHighMassGGH(); 
+  RooBWHighMassGGH(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      Bool_t is8TeV);
+  RooBWHighMassGGH(const RooBWHighMassGGH& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooBWHighMassGGH(*this,newname); }
+  Double_t Spline(Double_t xx) const;
+  inline virtual ~RooBWHighMassGGH() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+
+  Bool_t is8TeV;
+
+  Double_t effKPrime;
+  Double_t width;
+  Double_t delta;
+  Double_t alpha;
+  Double_t r;
+  Double_t beta;
+
+  
+  Double_t evaluate() const ;
+  void setPars() ;
+
+
+private:
+
+  ClassDef(RooBWHighMassGGH,1)
+};
+
+
+
+///////////////////////////////////////////////////
+class RooBWHighMassVBF : public RooAbsPdf {
+public:
+  RooBWHighMassVBF(); 
+  RooBWHighMassVBF(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      Bool_t is8TeV);
+  RooBWHighMassVBF(const RooBWHighMassVBF& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooBWHighMassVBF(*this,newname); }
+  inline virtual ~RooBWHighMassVBF() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+
+  Bool_t is8TeV;
+
+  Double_t effKPrime;
+  Double_t width;
+  Double_t delta;
+  Double_t alpha;
+  Double_t r;
+  Double_t beta;
+
+  
+  Double_t evaluate() const ;
+  void setPars() ;
+
+
+private:
+
+  ClassDef(RooBWHighMassVBF,1)
+};
 
 
 ///////////////////////////////////////////////////
