@@ -109,7 +109,7 @@ private:
 	ClassDef(RooggZZPdf,1) // Your description goes here...                                                                                                   
 };
 
-// ------- v2 below -------
+// ------- RooqqZZPdf_v2 -------
 
 
 class RooqqZZPdf_v2 : public RooAbsPdf {
@@ -162,6 +162,120 @@ private:
 	
 	ClassDef(RooqqZZPdf_v2,1) // Your description goes here...                                                                                                   
 };
+
+
+// ------- RooVBFZZPdf -------
+
+
+class RooVBFZZPdf : public RooAbsPdf {
+public:
+	RooVBFZZPdf() {} ;
+	RooVBFZZPdf(const char *name, const char *title,
+			   RooAbsReal& _m4l,
+			   RooAbsReal& _a0,
+			   RooAbsReal& _a1,
+			   RooAbsReal& _a2,
+			   RooAbsReal& _a3,
+			   RooAbsReal& _a4,
+			   RooAbsReal& _a5,
+			   RooAbsReal& _a6,
+			   RooAbsReal& _a7,
+			   RooAbsReal& _a8,
+			   RooAbsReal& _a9,
+			   RooAbsReal& _a10,
+			   RooAbsReal& _a11,
+			   RooAbsReal& _a12,
+		           RooAbsReal& _a13,
+		           RooAbsReal& _a14,
+		           RooAbsReal& _a15,
+			   RooAbsReal& _a16
+			   );
+	RooVBFZZPdf(const RooVBFZZPdf& other, const char* name=0) ;
+	virtual TObject* clone(const char* newname) const { return new RooVBFZZPdf(*this,newname); }
+	inline virtual ~RooVBFZZPdf() { }
+	
+protected:
+	
+	RooRealProxy m4l ;
+	RooRealProxy a0 ;
+	RooRealProxy a1 ;
+	RooRealProxy a2 ;
+	RooRealProxy a3 ;
+	RooRealProxy a4 ;
+	RooRealProxy a5 ;
+	RooRealProxy a6 ;
+	RooRealProxy a7 ;
+	RooRealProxy a8 ;
+	RooRealProxy a9 ;
+	RooRealProxy a10 ;
+	RooRealProxy a11 ;
+	RooRealProxy a12 ;
+	RooRealProxy a13 ;
+	RooRealProxy a14 ;
+	RooRealProxy a15 ;
+	RooRealProxy a16 ;
+	
+	
+	Double_t evaluate() const ;
+	
+private:
+	
+	ClassDef(RooVBFZZPdf,1) // Your description goes here...                                                                                                   
+};
+
+
+
+// ------- RooVBFZZPdf_v2 -------
+
+
+class RooVBFZZPdf_v2 : public RooAbsPdf {
+public:
+	RooVBFZZPdf_v2() {} ;
+	RooVBFZZPdf_v2(const char *name, const char *title,
+			   RooAbsReal& _m4l,
+			   RooAbsReal& _a4,
+			   RooAbsReal& _a5,
+			   RooAbsReal& _a6,
+			   RooAbsReal& _a7,
+			   RooAbsReal& _a8,
+			   RooAbsReal& _a9,
+			   RooAbsReal& _a10,
+			   RooAbsReal& _a11,
+			   RooAbsReal& _a12,
+		           RooAbsReal& _a13,
+		           RooAbsReal& _a14,
+		           RooAbsReal& _a15,
+			   RooAbsReal& _a16
+			   );
+	RooVBFZZPdf_v2(const RooVBFZZPdf_v2& other, const char* name=0) ;
+	virtual TObject* clone(const char* newname) const { return new RooVBFZZPdf_v2(*this,newname); }
+	inline virtual ~RooVBFZZPdf_v2() { }
+	
+protected:
+	
+	RooRealProxy m4l ;
+	RooRealProxy a4 ;
+	RooRealProxy a5 ;
+	RooRealProxy a6 ;
+	RooRealProxy a7 ;
+	RooRealProxy a8 ;
+	RooRealProxy a9 ;
+	RooRealProxy a10 ;
+	RooRealProxy a11 ;
+	RooRealProxy a12 ;
+	RooRealProxy a13 ;
+	RooRealProxy a14 ;
+	RooRealProxy a15 ;
+	RooRealProxy a16 ;
+	
+	
+	Double_t evaluate() const ;
+	
+private:
+	
+	ClassDef(RooVBFZZPdf_v2,1) // Your description goes here...                                                                                                   
+};
+
 
 
 
@@ -599,9 +713,11 @@ class RooRelBWUFParam : public RooAbsPdf {
 public:
 	RooRelBWUFParam() {} ;
 	RooRelBWUFParam(const char *name, const char *title,
-					RooAbsReal& _m4l,
-					RooAbsReal& _mH,
-					RooAbsReal& _scaleParam);
+			RooAbsReal& _m4l,
+			RooAbsReal& _mH,
+			RooAbsReal& _scaleParam,
+			Double_t _widthSF=1.
+			);
 	RooRelBWUFParam(const RooRelBWUFParam& other, const char* name=0) ;
 	virtual TObject* clone(const char* newname) const { return new RooRelBWUFParam(*this,newname); }
 	inline virtual ~RooRelBWUFParam() { }
@@ -611,12 +727,13 @@ protected:
 	RooRealProxy m4l ;
 	RooRealProxy mH ;
 	RooRealProxy scaleParam ;
+	Double_t widthSF ;
 	
 	Double_t evaluate() const ;
 	
 private:
 	
-	ClassDef(RooRelBWUFParam,2) // Your description goes here...                                                                                                    
+	ClassDef(RooRelBWUFParam,3) // Your description goes here...                                                                                                    
 };
 
 //////////////////////////////////////////////
@@ -746,6 +863,7 @@ public:
 	      RooAbsReal& _mH,
 	      RooAbsReal& _KPrime,
 	      RooAbsReal& _BRnew,
+	      RooAbsReal& _IntStr,
 	      Bool_t is8TeV);
   RooBWHighMassGGH(const RooBWHighMassGGH& other, const char* name=0) ;
   virtual TObject* clone(const char* newname) const { return new RooBWHighMassGGH(*this,newname); }
@@ -758,6 +876,7 @@ protected:
   RooRealProxy mH ;
   RooRealProxy KPrime ;
   RooRealProxy BRnew ;
+  RooRealProxy IntStr ;
 
   Bool_t is8TeV;
 
@@ -779,20 +898,19 @@ private:
 };
 
 
-
 ///////////////////////////////////////////////////
-class RooBWHighMassVBF : public RooAbsPdf {
+class RooBWGGH : public RooAbsPdf {
 public:
-  RooBWHighMassVBF(); 
-  RooBWHighMassVBF(const char *name, const char *title,
+  RooBWGGH(); 
+  RooBWGGH(const char *name, const char *title,
 	      RooAbsReal& _x,
 	      RooAbsReal& _mH,
 	      RooAbsReal& _KPrime,
 	      RooAbsReal& _BRnew,
 	      Bool_t is8TeV);
-  RooBWHighMassVBF(const RooBWHighMassVBF& other, const char* name=0) ;
-  virtual TObject* clone(const char* newname) const { return new RooBWHighMassVBF(*this,newname); }
-  inline virtual ~RooBWHighMassVBF() {  }
+  RooBWGGH(const RooBWGGH& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooBWGGH(*this,newname); }
+  inline virtual ~RooBWGGH() {  }
 
 protected:
 
@@ -817,7 +935,213 @@ protected:
 
 private:
 
+  ClassDef(RooBWGGH,1)
+};
+
+
+///////////////////////////////////////////////////
+class RooBWHighMassGGHNoInterf : public RooAbsPdf {
+public:
+  RooBWHighMassGGHNoInterf(); 
+  RooBWHighMassGGHNoInterf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      Bool_t is8TeV);
+  RooBWHighMassGGHNoInterf(const RooBWHighMassGGHNoInterf& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooBWHighMassGGHNoInterf(*this,newname); }
+  Double_t Spline(Double_t xx) const;
+  inline virtual ~RooBWHighMassGGHNoInterf() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+
+  Bool_t is8TeV;
+
+  Double_t effKPrime;
+  Double_t width;
+  Double_t delta;
+
+  
+  Double_t evaluate() const ;
+  void setPars() ;
+
+
+private:
+
+  ClassDef(RooBWHighMassGGHNoInterf,1)
+};
+
+
+
+///////////////////////////////////////////////////
+class RooBWHighMassVBF : public RooAbsPdf {
+public:
+  RooBWHighMassVBF(); 
+  RooBWHighMassVBF(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      RooAbsReal& _IntStr,
+	      Bool_t is8TeV);
+  RooBWHighMassVBF(const RooBWHighMassVBF& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooBWHighMassVBF(*this,newname); }
+  inline virtual ~RooBWHighMassVBF() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+  RooRealProxy IntStr ;
+
+  Bool_t is8TeV;
+
+  Double_t effKPrime;
+  Double_t width;
+  Double_t delta;
+  Double_t alpha;
+  Double_t r;
+  Double_t beta;
+
+  
+  Double_t evaluate() const ;
+  void setPars() ;
+
+
+private:
+
   ClassDef(RooBWHighMassVBF,1)
+};
+
+
+
+
+///////////////////////////////////////////////////
+class RooBWHighMassVBFNoInterf : public RooAbsPdf {
+public:
+  RooBWHighMassVBFNoInterf(); 
+  RooBWHighMassVBFNoInterf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      Bool_t is8TeV);
+  RooBWHighMassVBFNoInterf(const RooBWHighMassVBFNoInterf& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooBWHighMassVBFNoInterf(*this,newname); }
+  inline virtual ~RooBWHighMassVBFNoInterf() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+
+  Bool_t is8TeV;
+
+  Double_t effKPrime;
+  Double_t width;
+  Double_t delta;
+
+  
+  Double_t evaluate() const ;
+  void setPars() ;
+
+
+private:
+
+  ClassDef(RooBWHighMassVBFNoInterf,1)
+};
+
+
+///////////////////////////////////////////////////
+class RooCPSHighMassVBF : public RooAbsPdf {
+public:
+  RooCPSHighMassVBF(); 
+  RooCPSHighMassVBF(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      RooAbsReal& _IntStr,
+	      Bool_t is8TeV);
+  RooCPSHighMassVBF(const RooCPSHighMassVBF& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooCPSHighMassVBF(*this,newname); }
+  Double_t Spline(Double_t xx) const;
+  inline virtual ~RooCPSHighMassVBF() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+  RooRealProxy IntStr ;
+
+  Bool_t is8TeV;
+
+  Double_t effKPrime;
+  Double_t width;
+  Double_t delta;
+  Double_t alpha;
+  Double_t r;
+  Double_t beta;
+
+  
+  Double_t evaluate() const ;
+  void setPars() ;
+
+
+private:
+
+  ClassDef(RooCPSHighMassVBF,1)
+};
+
+
+///////////////////////////////////////////////////
+class RooCPSHighMassVBFNoInterf : public RooAbsPdf {
+public:
+  RooCPSHighMassVBFNoInterf(); 
+  RooCPSHighMassVBFNoInterf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      Bool_t is8TeV);
+  RooCPSHighMassVBFNoInterf(const RooCPSHighMassVBFNoInterf& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooCPSHighMassVBFNoInterf(*this,newname); }
+  Double_t Spline(Double_t xx) const;
+  inline virtual ~RooCPSHighMassVBFNoInterf() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+
+  Bool_t is8TeV;
+
+  Double_t effKPrime;
+  Double_t width;
+  Double_t delta;
+
+  
+  Double_t evaluate() const ;
+  void setPars() ;
+
+
+private:
+
+  ClassDef(RooCPSHighMassVBFNoInterf,1)
 };
 
 
