@@ -164,6 +164,120 @@ private:
 };
 
 
+// ------- RooVBFZZPdf -------
+
+
+class RooVBFZZPdf : public RooAbsPdf {
+public:
+	RooVBFZZPdf() {} ;
+	RooVBFZZPdf(const char *name, const char *title,
+			   RooAbsReal& _m4l,
+			   RooAbsReal& _a0,
+			   RooAbsReal& _a1,
+			   RooAbsReal& _a2,
+			   RooAbsReal& _a3,
+			   RooAbsReal& _a4,
+			   RooAbsReal& _a5,
+			   RooAbsReal& _a6,
+			   RooAbsReal& _a7,
+			   RooAbsReal& _a8,
+			   RooAbsReal& _a9,
+			   RooAbsReal& _a10,
+			   RooAbsReal& _a11,
+			   RooAbsReal& _a12,
+		           RooAbsReal& _a13,
+		           RooAbsReal& _a14,
+		           RooAbsReal& _a15,
+			   RooAbsReal& _a16
+			   );
+	RooVBFZZPdf(const RooVBFZZPdf& other, const char* name=0) ;
+	virtual TObject* clone(const char* newname) const { return new RooVBFZZPdf(*this,newname); }
+	inline virtual ~RooVBFZZPdf() { }
+	
+protected:
+	
+	RooRealProxy m4l ;
+	RooRealProxy a0 ;
+	RooRealProxy a1 ;
+	RooRealProxy a2 ;
+	RooRealProxy a3 ;
+	RooRealProxy a4 ;
+	RooRealProxy a5 ;
+	RooRealProxy a6 ;
+	RooRealProxy a7 ;
+	RooRealProxy a8 ;
+	RooRealProxy a9 ;
+	RooRealProxy a10 ;
+	RooRealProxy a11 ;
+	RooRealProxy a12 ;
+	RooRealProxy a13 ;
+	RooRealProxy a14 ;
+	RooRealProxy a15 ;
+	RooRealProxy a16 ;
+	
+	
+	Double_t evaluate() const ;
+	
+private:
+	
+	ClassDef(RooVBFZZPdf,1) // Your description goes here...                                                                                                   
+};
+
+
+
+// ------- RooVBFZZPdf_v2 -------
+
+
+class RooVBFZZPdf_v2 : public RooAbsPdf {
+public:
+	RooVBFZZPdf_v2() {} ;
+	RooVBFZZPdf_v2(const char *name, const char *title,
+			   RooAbsReal& _m4l,
+			   RooAbsReal& _a4,
+			   RooAbsReal& _a5,
+			   RooAbsReal& _a6,
+			   RooAbsReal& _a7,
+			   RooAbsReal& _a8,
+			   RooAbsReal& _a9,
+			   RooAbsReal& _a10,
+			   RooAbsReal& _a11,
+			   RooAbsReal& _a12,
+		           RooAbsReal& _a13,
+		           RooAbsReal& _a14,
+		           RooAbsReal& _a15,
+			   RooAbsReal& _a16
+			   );
+	RooVBFZZPdf_v2(const RooVBFZZPdf_v2& other, const char* name=0) ;
+	virtual TObject* clone(const char* newname) const { return new RooVBFZZPdf_v2(*this,newname); }
+	inline virtual ~RooVBFZZPdf_v2() { }
+	
+protected:
+	
+	RooRealProxy m4l ;
+	RooRealProxy a4 ;
+	RooRealProxy a5 ;
+	RooRealProxy a6 ;
+	RooRealProxy a7 ;
+	RooRealProxy a8 ;
+	RooRealProxy a9 ;
+	RooRealProxy a10 ;
+	RooRealProxy a11 ;
+	RooRealProxy a12 ;
+	RooRealProxy a13 ;
+	RooRealProxy a14 ;
+	RooRealProxy a15 ;
+	RooRealProxy a16 ;
+	
+	
+	Double_t evaluate() const ;
+	
+private:
+	
+	ClassDef(RooVBFZZPdf_v2,1) // Your description goes here...                                                                                                   
+};
+
+
+
 
 
 class RooggZZPdf_v2 : public RooAbsPdf {
@@ -877,7 +991,6 @@ protected:
   Double_t getDelta(const Double_t& mass, const Double_t& cprime) const;
   
 
-
 private:
 
   ClassDef(RooCPSHighMassGGHNoInterf,4)
@@ -969,7 +1082,6 @@ protected:
   Double_t interpolateMatrix(const Double_t matrix[][5], const Double_t& x, const Double_t& y) const;
   Double_t getWidth(const Double_t& mass, const Double_t& cprime) const;
   Double_t getDelta(const Double_t& mass, const Double_t& cprime) const;
-
 
 
 private:

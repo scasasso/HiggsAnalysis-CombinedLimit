@@ -2193,7 +2193,6 @@ Double_t RooggZZPdf_v2::evaluate() const
 
 
 
-
 ClassImp(RooBetaFunc_v2) 
 
 RooBetaFunc_v2::RooBetaFunc_v2(){}
@@ -6913,8 +6912,6 @@ Double_t RooCPSHighMassVBF::getR(const Double_t& mass, const Double_t& cprime) c
 Double_t RooCPSHighMassVBF::getBeta(const Double_t& mass, const Double_t& cprime) const {return interpolateMatrix(a_beta,mass,cprime);}
 
 
-
-
 Double_t RooCPSHighMassVBF::Spline(Double_t xx) const{
   
 
@@ -7552,4 +7549,3 @@ Double_t RooSigPlusInt::Spline(Double_t xx) const{
    double dx=xx-fX[klow];
    return (fY[klow]+dx*(fB[klow]+dx*(fC[klow]+dx*(fD[klow]+dx*(fE[klow]+dx*fF[klow])))));
 }
-
