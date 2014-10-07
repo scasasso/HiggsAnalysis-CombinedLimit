@@ -112,5 +112,10 @@
 #pragma link C++ class RooAlpha4GausExpPdf+;
 #pragma link C++ class RooGausExpPdf+;
 #pragma link C++ class RooDoubleCrystalBall+;
+#pragma link C++ class RooCPSHighMassGGH+;
+#pragma link C++ class RooBWHighMassGGH+;
+#pragma link C++ class RooCPSHighMassGGHNoInterf+;
+#pragma link C++ class RooCPSHighMassVBF+;
+#pragma link C++ class RooCPSHighMassVBFNoInterf+;
 
 #endif

@@ -733,6 +733,239 @@ class RooaDoubleCBxBW : public RooAbsPdf {
     };
 
 
+///////////////////////////////////////////////////
+class RooCPSHighMassGGH : public RooAbsPdf {
+public:
+  RooCPSHighMassGGH(); 
+  RooCPSHighMassGGH(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      RooAbsReal& _IntStr,
+	      RooAbsReal& _WidthScl,
+	      Bool_t is8TeV);
+  RooCPSHighMassGGH(const RooCPSHighMassGGH& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooCPSHighMassGGH(*this,newname); }
+  Double_t Spline(Double_t xx) const;
+  inline virtual ~RooCPSHighMassGGH() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+  RooRealProxy IntStr ;
+  RooRealProxy WidthScl ;
+
+  Bool_t is8TeV;
+
+  Double_t a_width[7][5];
+  Double_t a_delta[7][5];
+  Double_t a_alpha[7][5];
+  Double_t a_r[7][5];
+  Double_t a_beta[7][5];
+  
+  Double_t evaluate() const ;
+  void initMatrices() ;
+  Double_t interpolateMatrix(const Double_t matrix[][5], const Double_t& x, const Double_t& y) const;
+  Double_t getWidth(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getDelta(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getAlpha(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getR(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getBeta(const Double_t& mass, const Double_t& cprime) const;
+  
+
+
+private:
+
+  ClassDef(RooCPSHighMassGGH,5)
+};
+
+
+
+///////////////////////////////////////////////////
+class RooBWHighMassGGH : public RooAbsPdf {
+public:
+  RooBWHighMassGGH(); 
+  RooBWHighMassGGH(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      RooAbsReal& _IntStr,
+	      Bool_t is8TeV);
+  RooBWHighMassGGH(const RooBWHighMassGGH& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooBWHighMassGGH(*this,newname); }
+  inline virtual ~RooBWHighMassGGH() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+  RooRealProxy IntStr ;
+
+  Bool_t is8TeV;
+
+  Double_t a_width[7][5];
+  Double_t a_delta[7][5];
+  Double_t a_alpha[7][5];
+  Double_t a_r[7][5];
+  Double_t a_beta[7][5];
+  
+  Double_t evaluate() const ;
+  void initMatrices() ;
+  Double_t interpolateMatrix(const Double_t matrix[][5], const Double_t& x, const Double_t& y) const;
+  Double_t getWidth(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getDelta(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getAlpha(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getR(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getBeta(const Double_t& mass, const Double_t& cprime) const;
+
+  Double_t H_width(Double_t mass) const;
+  
+
+
+private:
+
+  ClassDef(RooBWHighMassGGH,4)
+};
+
+
+///////////////////////////////////////////////////
+class RooCPSHighMassGGHNoInterf : public RooAbsPdf {
+public:
+  RooCPSHighMassGGHNoInterf(); 
+  RooCPSHighMassGGHNoInterf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      Bool_t is8TeV);
+  RooCPSHighMassGGHNoInterf(const RooCPSHighMassGGHNoInterf& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooCPSHighMassGGHNoInterf(*this,newname); }
+  Double_t Spline(Double_t xx) const;
+  inline virtual ~RooCPSHighMassGGHNoInterf() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+
+  Bool_t is8TeV;
+
+  Double_t a_width[7][5];
+  Double_t a_delta[7][5];
+  
+  Double_t evaluate() const ;
+  void initMatrices() ;
+  Double_t interpolateMatrix(const Double_t matrix[][5], const Double_t& x, const Double_t& y) const;
+  Double_t getWidth(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getDelta(const Double_t& mass, const Double_t& cprime) const;
+  
+
+private:
+
+  ClassDef(RooCPSHighMassGGHNoInterf,4)
+};
+
+
+
+
+///////////////////////////////////////////////////
+class RooCPSHighMassVBF : public RooAbsPdf {
+public:
+  RooCPSHighMassVBF(); 
+  RooCPSHighMassVBF(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      RooAbsReal& _IntStr,
+	      RooAbsReal& _WidthScl,
+	      Bool_t is8TeV);
+  RooCPSHighMassVBF(const RooCPSHighMassVBF& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooCPSHighMassVBF(*this,newname); }
+  Double_t Spline(Double_t xx) const;
+  inline virtual ~RooCPSHighMassVBF() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+  RooRealProxy IntStr ;
+  RooRealProxy WidthScl ;
+
+  Bool_t is8TeV;
+
+  Double_t a_width[7][5];
+  Double_t a_delta[7][5];
+  Double_t a_alpha[7][5];
+  Double_t a_r[7][5];
+  Double_t a_beta[7][5];
+  
+  Double_t evaluate() const ;
+  void initMatrices() ;
+  Double_t interpolateMatrix(const Double_t matrix[][5], const Double_t& x, const Double_t& y) const;
+  Double_t getWidth(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getDelta(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getAlpha(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getR(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getBeta(const Double_t& mass, const Double_t& cprime) const;
+
+
+
+private:
+
+  ClassDef(RooCPSHighMassVBF,4)
+};
+
+
+///////////////////////////////////////////////////
+class RooCPSHighMassVBFNoInterf : public RooAbsPdf {
+public:
+  RooCPSHighMassVBFNoInterf(); 
+  RooCPSHighMassVBFNoInterf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _mH,
+	      RooAbsReal& _KPrime,
+	      RooAbsReal& _BRnew,
+	      Bool_t is8TeV);
+  RooCPSHighMassVBFNoInterf(const RooCPSHighMassVBFNoInterf& other, const char* name=0) ;
+  virtual TObject* clone(const char* newname) const { return new RooCPSHighMassVBFNoInterf(*this,newname); }
+  Double_t Spline(Double_t xx) const;
+  inline virtual ~RooCPSHighMassVBFNoInterf() {  }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy mH ;
+  RooRealProxy KPrime ;
+  RooRealProxy BRnew ;
+
+  Bool_t is8TeV;
+
+  Double_t a_width[7][5];
+  Double_t a_delta[7][5];
+  
+  Double_t evaluate() const ;
+  void initMatrices() ;
+  Double_t interpolateMatrix(const Double_t matrix[][5], const Double_t& x, const Double_t& y) const;
+  Double_t getWidth(const Double_t& mass, const Double_t& cprime) const;
+  Double_t getDelta(const Double_t& mass, const Double_t& cprime) const;
+
+
+private:
+
+  ClassDef(RooCPSHighMassVBFNoInterf,4)
+};
 
 
 
