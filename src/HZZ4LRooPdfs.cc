@@ -28,7 +28,7 @@ namespace RooFit{
 
 	Double_t pdf1(double mHstar,double mHreq);
         Double_t pdf1SM4(double mHstar,double mHreq);
-	Double_t pdf1Param(double mHstar,double mHreq,double x);
+	Double_t pdf1Param(double mHstar,double mHreq,double x,double widthSF=1.);
 	Double_t rho(double r, TString proc);
 	Double_t Sigma(double mHreq, TString proc);
 	
@@ -1812,12 +1812,12 @@ double HiggsWidthSM4(int ID, double mHrequested){
 	}
 
 
-	Double_t pdf1Param(Double_t mHstar, Double_t mHreq, Double_t x)
+	Double_t pdf1Param(Double_t mHstar, Double_t mHreq, Double_t x, Double_t widthSF)
 	{
 		
 		Double_t Gamma_gg = HiggsWidth(7,mHstar);
 		Double_t Gamma_ZZ = HiggsWidth(11,mHstar);
-		Double_t Gamma_TOT = HiggsWidth(0,mHstar);
+		Double_t Gamma_TOT = widthSF*HiggsWidth(0,mHstar);
 		Double_t Gamma_TOTFixed = HiggsWidth(0,mHreq);
 		
 		Double_t ggLum = Lgg_7(mHstar);
@@ -3208,11 +3208,13 @@ ClassImp(RooRelBWUFParam)
 RooRelBWUFParam::RooRelBWUFParam(const char *name, const char *title,
 					   RooAbsReal& _m4l,
 					   RooAbsReal& _mH,
-					   RooAbsReal& _scaleParam) :
+					   RooAbsReal& _scaleParam,
+				           Double_t _widthSF) :
 RooAbsPdf(name,title),
 m4l("m4l","m4l",this,_m4l),
 mH("mH","mH",this,_mH),
-scaleParam("scaleParam","scaleParam",this,_scaleParam)
+scaleParam("scaleParam","scaleParam",this,_scaleParam),
+widthSF(_widthSF)
 {
 }
 
@@ -3220,7 +3222,8 @@ RooRelBWUFParam::RooRelBWUFParam(const RooRelBWUFParam& other, const char* name)
 RooAbsPdf(other,name),
 m4l("m4l",this,other.m4l),
 mH("mH",this,other.mH),
-scaleParam("scaleParam",this,other.scaleParam)
+scaleParam("scaleParam",this,other.scaleParam),
+widthSF(other.widthSF)
 {
 }
 
@@ -3246,7 +3249,7 @@ Double_t RooRelBWUFParam::evaluate() const
 	 return pdf;
 	 */
 	///*
-	Double_t pdf_1_NoBrem = pdf1Param(mStar,mHreq,x);
+	Double_t pdf_1_NoBrem = pdf1Param(mStar,mHreq,x,widthSF);
 	return pdf_1_NoBrem;
 	//*/
 }

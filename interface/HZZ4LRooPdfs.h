@@ -598,7 +598,8 @@ public:
 	RooRelBWUFParam(const char *name, const char *title,
 					RooAbsReal& _m4l,
 					RooAbsReal& _mH,
-					RooAbsReal& _scaleParam);
+					RooAbsReal& _scaleParam,
+			                Double_t _widthSF=1.);
 	RooRelBWUFParam(const RooRelBWUFParam& other, const char* name=0) ;
 	virtual TObject* clone(const char* newname) const { return new RooRelBWUFParam(*this,newname); }
 	inline virtual ~RooRelBWUFParam() { }
@@ -608,6 +609,7 @@ protected:
 	RooRealProxy m4l ;
 	RooRealProxy mH ;
 	RooRealProxy scaleParam ;
+	Double_t widthSF ;
 	
 	Double_t evaluate() const ;
 	
