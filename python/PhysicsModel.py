@@ -161,6 +161,92 @@ class SMLikeHiggsModel(PhysicsModel):
         (processSource, foundDecay, foundEnergy) = getHiggsProdDecMode(bin,process,self.options)
         return self.getHiggsSignalYieldScale(processSource, foundDecay, foundEnergy)
 
+class RA1SusyModel(PhysicsModel):
+    def doParametersOfInterest(self):
+        """Create POI and other parameters, and define the POI set."""
+        # Signal strength (POI)
+        self.modelBuilder.doVar("r[1.,0.,20.]")
+
+        # Transfer factor (constant) CONF1
+        TF_mu_str = str(0.5/10000) # FIXME: so far yields in MC SR and CR are hardcoded
+        TF_mm_str = str(0.5/1000) # FIXME: so far yields in MC SR and CR are hardcoded
+        TF_ph_str = str(0.5/1000) # FIXME: so far yields in MC SR and CR are hardcoded       
+        self.modelBuilder.doVar("TF_mu["+TF_mu_str+",0.,1.]")
+        self.modelBuilder.out.var("TF_mu").setConstant(True)
+        self.modelBuilder.doVar("TF_mm["+TF_mm_str+",0.,1.]")
+        self.modelBuilder.out.var("TF_mm").setConstant(True)
+        self.modelBuilder.doVar("TF_ph["+TF_ph_str+",0.,1.]")
+        self.modelBuilder.out.var("TF_ph").setConstant(True)
+        
+
+        # f_Zinv (nuisance)
+        self.modelBuilder.doVar("f_Zinv[0.5,0.,1.]")
+        #self.modelBuilder.out.var("f_Zinv").setConstant(True)
+
+        # ewk (nuisance)
+        self.modelBuilder.doVar("ewk_had[1.,0.,2.]")
+        #self.modelBuilder.out.var("ewk_had").setConstant(True)
+
+        # Define expressions for yields in CR
+        self.modelBuilder.factory_("expr::CR_mu(\"(1/@0)*(1-@1)*@2\",TF_mu,f_Zinv,ewk_had)")
+        self.modelBuilder.factory_("expr::CR_mm(\"(1/@0)*@1*@2\",TF_mm,f_Zinv,ewk_had)")
+        self.modelBuilder.factory_("expr::CR_ph(\"(1/@0)*@1*@2\",TF_ph,f_Zinv,ewk_had)")        
+
+        # Define POIs
+        poi = 'r'
+        self.modelBuilder.doSet("POI",poi)
+    
+    def getYieldScale(self,bin,process):
+        "I am doing dummy tests, don't take this too seriously"
+        if "_had" in bin:
+            if self.DC.isSignal[process] == 1:
+                return "r"
+            else: return "ewk_had"
+        elif "_mu" in bin:
+            if process == "ewk_cr":
+                return "CR_mu"
+            else: return 1
+        elif "_mm" in bin:
+            if process == "ewk_cr":
+                return "CR_mm"
+            else: return 1
+        elif "_ph" in bin:
+            if process == "ewk_cr":
+                return "CR_ph"
+            else: return 1
+        else:
+            print "Physics model complains: no rule to scale process ",process,", in bin ",bin," so it will return 1"
+            return 1
+
+
+        
+class RA1SusyModel2(PhysicsModel):
+    def doParametersOfInterest(self):
+        """Create POI and other parameters, and define the POI set."""
+        # Signal strength (POI)
+        self.modelBuilder.doVar("r[1.,0.,20.]")
+        self.modelBuilder.doVar("r_ewk_ttW[1.,0.,20.]")
+        self.modelBuilder.doVar("r_ewk_Zinv[1.,0.,20.]")        
+
+        # Define POIs
+        poi = 'r'
+        self.modelBuilder.doSet("POI",poi)
+
+
+    def getYieldScale(self,bin,process):
+
+        if self.DC.isSignal[process] == 1:
+            return "r"
+        elif "ttW" in process: return "r_ewk_ttW"
+        elif "Zinv" in process: return "r_ewk_Zinv"
+        else:
+            print "Physics model complains: no rule to scale process ",process,", in bin ",bin," so it will return 1"
+            return 1
+        
+                
+
+
+
 class StrictSMLikeHiggsModel(SMLikeHiggsModel):
     "Doesn't do anything more, but validates that the signal process names are correct"
     def getHiggsSignalYieldScale(self,production,decay, energy):
@@ -674,6 +760,8 @@ class RatioBRSMHiggs(SMLikeHiggsModel):
 
 defaultModel = PhysicsModel()
 multiSignalModel = MultiSignalModel()
+RA1SusyModel = RA1SusyModel()
+RA1SusyModel2 = RA1SusyModel2()
 strictSMLikeHiggs = StrictSMLikeHiggsModel()
 floatingXSHiggs = FloatingXSHiggs()
 rVrFXSHiggs = RvRfXSHiggs()
