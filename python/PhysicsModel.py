@@ -271,8 +271,8 @@ class RA1SusyModel3(PhysicsModel):
         # Other parameters (rttW_i, r_Zinv_i)
         for aJetCat in self.jetCats:
             for aHT in self.htLows:
-                self.modelBuilder.doVar("r_ewk_ttW_"+aJetCat[0]+"_"+aJetCat[1]+"_ht"+str(aHT)+"[1.,0.,5.]")
-                self.modelBuilder.doVar("r_ewk_Zinv_"+aJetCat[0]+"_"+aJetCat[1]+"_ht"+str(aHT)+"[1.,0.,5.]")
+                self.modelBuilder.doVar("r_ewk_ttW_"+aJetCat[0]+"_"+aJetCat[1]+"_ht"+str(aHT)+"[1.,0.5,2.]")
+                self.modelBuilder.doVar("r_ewk_Zinv_"+aJetCat[0]+"_"+aJetCat[1]+"_ht"+str(aHT)+"[1.,0.5,2.]")
 
         # Define POIs
         poi = 'r'
@@ -281,10 +281,13 @@ class RA1SusyModel3(PhysicsModel):
 
     def getYieldScale(self,bin,process):
 
+        # N.B.: this assumes that the name of the bin goes something like "htX_bjetCat_njetCat_mhtY_selection"
+        # this naming convention comes from the single card convention "bjetCat_njetCat_mhtY_selection" AND
+        # the fact that we combine different HT bins, calling combineCards.py htX=..
         theHTBin   = str(bin).split("_")[0].replace("ht","")
         theBTagBin = str(bin).split("_")[1]
         theNJetBin = str(bin).split("_")[2]
-        theMHTBin   = str(bin).split("_")[3].replace("mhtbin","")
+        theMHTBin   = str(bin).split("_")[3].replace("mht","")
         
         if self.DC.isSignal[process] == 1:
             return "r"
