@@ -225,8 +225,8 @@ class RA1SusyModel2(PhysicsModel):
         """Create POI and other parameters, and define the POI set."""
         # Signal strength (POI)
         self.modelBuilder.doVar("r[1.,0.,20.]")
-        self.modelBuilder.doVar("r_ewk_ttW[1.,0.,20.]")
-        self.modelBuilder.doVar("r_ewk_Zinv[1.,0.,20.]")        
+        self.modelBuilder.doVar("r_ewk_ttW[1.,0.2,3.]")
+        self.modelBuilder.doVar("r_ewk_Zinv[1.,0.2,3.]")        
 
         # Define POIs
         poi = 'r'
@@ -242,8 +242,48 @@ class RA1SusyModel2(PhysicsModel):
         else:
             print "Physics model complains: no rule to scale process ",process,", in bin ",bin," so it will return 1"
             return 1
-        
-                
+
+
+class RA1SusyModel3(PhysicsModel):
+    def __init__(self):
+        self.nHTbins = 0
+        self.htLows = []
+
+    def setPhysicsOptions(self,physOptions):
+        for po in physOptions:
+            if po.startswith("htbins="):
+                htLows_str =  po.replace("htbins=","").replace("[","").replace("]","").split(",")
+                self.htLows = [int(i) for i in htLows_str]
+            else:
+                print "Physics model RA1SusyModel3 cannot parse the following physics options:\n",po
+                exit(1)
+                        
+    def doParametersOfInterest(self):
+        """Create POI and other parameters, and define the POI set."""
+        # Signal strength (POI)
+        self.modelBuilder.doVar("r[1.,0.,20.]")
+
+        # Other parameters (rttW_i, r_Zinv_i)
+        for aHT in self.htLows:
+            self.modelBuilder.doVar("r_ewk_ttW_ht"+str(aHT)+"[1.,0.,5.]")
+            self.modelBuilder.doVar("r_ewk_Zinv_ht"+str(aHT)+"[1.,0.,5.]")        
+
+        # Define POIs
+        poi = 'r'
+        self.modelBuilder.doSet("POI",poi)
+
+
+    def getYieldScale(self,bin,process):
+
+        theHTBin = str(bin).split("_data_")[0].replace("htbin","")
+        if self.DC.isSignal[process] == 1:
+            return "r"
+        elif "ttW" in process: return "r_ewk_ttW_ht"+theHTBin
+        elif "Zinv" in process: return "r_ewk_Zinv_ht"+theHTBin
+        else:
+            print "Physics model complains: no rule to scale process ",process,", in bin ",bin," so it will return 1"
+            return 1
+
 
 
 
@@ -762,6 +802,7 @@ defaultModel = PhysicsModel()
 multiSignalModel = MultiSignalModel()
 RA1SusyModel = RA1SusyModel()
 RA1SusyModel2 = RA1SusyModel2()
+RA1SusyModel3 = RA1SusyModel3()
 strictSMLikeHiggs = StrictSMLikeHiggsModel()
 floatingXSHiggs = FloatingXSHiggs()
 rVrFXSHiggs = RvRfXSHiggs()
