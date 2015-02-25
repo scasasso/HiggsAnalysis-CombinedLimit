@@ -246,22 +246,7 @@ class RA1SusyModel2(PhysicsModel):
 
 class RA1SusyModel3(PhysicsModel):
     def __init__(self):
-        self.nHTbins = 0
-        self.htLows = []
-        self.jetCats = []
-
-    def setPhysicsOptions(self,physOptions):
-        for po in physOptions:
-            if po.startswith("htbins="): self.htLows = [int(i) for i in po.replace("htbins=","").replace("[","").replace("]","").split(",")]
-            elif po.startswith("cats="):
-                catTuples = po.replace("cats=","").replace("[","").replace("]","").split("),(")
-                for aTuple in catTuples: 
-                    btagCat = aTuple.replace("(","").replace(")","").split(",")[0]
-                    njetCat = aTuple.replace("(","").replace(")","").split(",")[1]
-                    self.jetCats.append((btagCat,njetCat))
-            else:
-                print "Physics model RA1SusyModel3 cannot parse the following physics options:\n",po
-                exit(1)
+        self.hadBins = []
                         
     def doParametersOfInterest(self):
         """Create POI and other parameters, and define the POI set."""
@@ -269,10 +254,12 @@ class RA1SusyModel3(PhysicsModel):
         self.modelBuilder.doVar("r[1.,0.,20.]")
 
         # Other parameters (rttW_i, r_Zinv_i)
-        for aJetCat in self.jetCats:
-            for aHT in self.htLows:
-                self.modelBuilder.doVar("r_ewk_ttW_"+aJetCat[0]+"_"+aJetCat[1]+"_ht"+str(aHT)+"[1.,0.5,2.]")
-                self.modelBuilder.doVar("r_ewk_Zinv_"+aJetCat[0]+"_"+aJetCat[1]+"_ht"+str(aHT)+"[1.,0.5,2.]")
+        for aBin in self.DC.bins:
+            if "_had" in aBin: self.hadBins.append(aBin.replace("_had",""))
+            
+        for aCat in self.hadBins:
+            self.modelBuilder.doVar("r_ewk_ttW_"+aCat+"[1.,0.,20.]")
+            self.modelBuilder.doVar("r_ewk_Zinv_"+aCat+"[1.,0.,20.]")
 
         # Define POIs
         poi = 'r'
@@ -281,18 +268,11 @@ class RA1SusyModel3(PhysicsModel):
 
     def getYieldScale(self,bin,process):
 
-        # N.B.: this assumes that the name of the bin goes something like "htX_bjetCat_njetCat_mhtY_selection"
-        # this naming convention comes from the single card convention "bjetCat_njetCat_mhtY_selection" AND
-        # the fact that we combine different HT bins, calling combineCards.py htX=..
-        theHTBin   = str(bin).split("_")[0].replace("ht","")
-        theBTagBin = str(bin).split("_")[1]
-        theNJetBin = str(bin).split("_")[2]
-        theMHTBin   = str(bin).split("_")[3].replace("mht","")
-        
+        regTag = bin.split("_")[-1]
         if self.DC.isSignal[process] == 1:
             return "r"
-        elif "ttW" in process: return "r_ewk_ttW_"+theBTagBin+"_"+theNJetBin+"_ht"+theHTBin
-        elif "Zinv" in process: return "r_ewk_Zinv_"+theBTagBin+"_"+theNJetBin+"_ht"+theHTBin        
+        elif "ttW" in process: return "r_ewk_ttW_"+bin.replace("_"+regTag,"")
+        elif "Zinv" in process: return "r_ewk_Zinv_"+bin.replace("_"+regTag,"")        
         else:
             print "Physics model complains: no rule to scale process ",process,", in bin ",bin," so it will return 1"
             return 1
