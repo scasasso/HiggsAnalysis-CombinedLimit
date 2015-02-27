@@ -246,7 +246,8 @@ class RA1SusyModel2(PhysicsModel):
 
 class RA1SusyModel3(PhysicsModel):
     def __init__(self):
-        self.hadBins = []
+        self.jetBins = []
+        self.parDict = {}
                         
     def doParametersOfInterest(self):
         """Create POI and other parameters, and define the POI set."""
@@ -255,11 +256,18 @@ class RA1SusyModel3(PhysicsModel):
 
         # Other parameters (rttW_i, r_Zinv_i)
         for aBin in self.DC.bins:
-            if "_had" in aBin: self.hadBins.append(aBin.replace("_had",""))
+            if "_had" in aBin and "mht0" in aBin: self.jetBins.append(aBin.replace("_mht0_had",""))
             
-        for aCat in self.hadBins:
-            self.modelBuilder.doVar("r_ewk_ttW_"+aCat+"[1.,0.,20.]")
-            self.modelBuilder.doVar("r_ewk_Zinv_"+aCat+"[1.,0.,20.]")
+        for aCat in self.jetBins:
+            if "eq2b" in aCat or "ge3b" in aCat:
+                self.modelBuilder.doVar("r_ewk_"+aCat+"[1.,0.5,2.]")
+                self.parDict[aCat,"ewk_ttW"] = "r_ewk_"+aCat
+                self.parDict[aCat,"ewk_Zinv"] = "r_ewk_"+aCat                
+            else:
+                self.modelBuilder.doVar("r_ewk_ttW_"+aCat+"[1.,0.5,2.]")
+                self.modelBuilder.doVar("r_ewk_Zinv_"+aCat+"[1.,0.5,2.]")
+                self.parDict[aCat,"ewk_ttW"] = "r_ewk_ttW_"+aCat
+                self.parDict[aCat,"ewk_Zinv"] = "r_ewk_Zinv_"+aCat                                
 
         # Define POIs
         poi = 'r'
@@ -267,16 +275,12 @@ class RA1SusyModel3(PhysicsModel):
 
 
     def getYieldScale(self,bin,process):
-
+        
         regTag = bin.split("_")[-1]
-        if self.DC.isSignal[process] == 1:
-            return "r"
-        elif "ttW" in process: return "r_ewk_ttW_"+bin.replace("_"+regTag,"")
-        elif "Zinv" in process: return "r_ewk_Zinv_"+bin.replace("_"+regTag,"")        
-        else:
-            print "Physics model complains: no rule to scale process ",process,", in bin ",bin," so it will return 1"
-            return 1
-
+        catTag = bin.split("_mht")[0]
+        if self.DC.isSignal[process] == 1: return "r"
+        else: return self.parDict[catTag,process]
+            
 
 
 
