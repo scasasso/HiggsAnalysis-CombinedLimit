@@ -248,6 +248,8 @@ class RA1SusyModel3(PhysicsModel):
     def __init__(self):
         self.jetBins = []
         self.parDict = {}
+        self.doShape = False
+        self.combinedCards = False
                         
     def doParametersOfInterest(self):
         """Create POI and other parameters, and define the POI set."""
@@ -256,11 +258,17 @@ class RA1SusyModel3(PhysicsModel):
 
         # Other parameters (rttW_i, r_Zinv_i)
         for aBin in self.DC.bins:
-            if "_had" in aBin and ("mht0" in aBin or len(aBin.split("_"))<=3):
-                binName = aBin.replace("_had","")
-                if "mht0" in aBin: binName = binName.replace("_mht0","")
-                self.jetBins.append(binName)
-            
+            if "_had" in aBin: # we do not want to double count the bins
+                theIDlist = aBin.split("_")
+                if "ht" in theIDlist[0]: #it means we have combined cards
+                    self.combinedCards = True
+                    if "mht" in theIDlist[3]: self.doShape = True
+                    self.jetBins.append(theIDlist[1]+"_"+theIDlist[2])
+                else:
+                    if "mht" in theIDlist[2]: self.doShape = True
+                    self.jetBins.append(theIDlist[0]+"_"+theIDlist[1])
+                    
+        
         for aCat in self.jetBins:
             if "eq2b" in aCat or "ge3b" in aCat:
                 self.modelBuilder.doVar("r_ewk_"+aCat+"[1.,0.5,2.]")
@@ -280,8 +288,9 @@ class RA1SusyModel3(PhysicsModel):
     def getYieldScale(self,bin,process):
 
         regTag = bin.split("_")[-1]
-        if "mht" in bin: catTag = bin.split("_mht")[0]
-        else: catTag = bin.replace("_"+regTag,"")
+        if self.combinedCards: catTag = bin.split("_")[1]+"_"+bin.split("_")[2]
+        else: catTag = bin.split("_")[0]+"_"+bin.split("_")[1]
+        
         if self.DC.isSignal[process] == 1: return "r"
         else: return self.parDict[catTag,process]
 
