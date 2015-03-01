@@ -256,7 +256,10 @@ class RA1SusyModel3(PhysicsModel):
 
         # Other parameters (rttW_i, r_Zinv_i)
         for aBin in self.DC.bins:
-            if "_had" in aBin and "mht0" in aBin: self.jetBins.append(aBin.replace("_mht0_had",""))
+            if "_had" in aBin and ("mht0" in aBin or len(aBin.split("_"))<=3):
+                binName = aBin.replace("_had","")
+                if "mht0" in aBin: binName = binName.replace("_mht0","")
+                self.jetBins.append(binName)
             
         for aCat in self.jetBins:
             if "eq2b" in aCat or "ge3b" in aCat:
@@ -267,7 +270,7 @@ class RA1SusyModel3(PhysicsModel):
                 self.modelBuilder.doVar("r_ewk_ttW_"+aCat+"[1.,0.5,2.]")
                 self.modelBuilder.doVar("r_ewk_Zinv_"+aCat+"[1.,0.5,2.]")
                 self.parDict[aCat,"ewk_ttW"] = "r_ewk_ttW_"+aCat
-                self.parDict[aCat,"ewk_Zinv"] = "r_ewk_Zinv_"+aCat                                
+                self.parDict[aCat,"ewk_Zinv"] = "r_ewk_Zinv_"+aCat
 
         # Define POIs
         poi = 'r'
@@ -275,12 +278,12 @@ class RA1SusyModel3(PhysicsModel):
 
 
     def getYieldScale(self,bin,process):
-        
+
         regTag = bin.split("_")[-1]
-        catTag = bin.split("_mht")[0]
+        if "mht" in bin: catTag = bin.split("_mht")[0]
+        else: catTag = bin.replace("_"+regTag,"")
         if self.DC.isSignal[process] == 1: return "r"
         else: return self.parDict[catTag,process]
-            
 
 
 
