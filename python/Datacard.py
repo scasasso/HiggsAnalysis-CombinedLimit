@@ -73,7 +73,7 @@ class Datacard():
         thrid element as indicated by idx. If there is no entry for a given bin, process and idx an empty list is
         returned. 
         """
-        path = ''
+        path = ''        
         if not bin in self.shapeMap.keys() :
             if '*' in self.shapeMap.keys() :
                 if not proc in self.shapeMap['*'] :
@@ -82,7 +82,10 @@ class Datacard():
                 else :
                     path = self.shapeMap['*'][proc][idx]
         else :
-            path = self.shapeMap[bin][proc][idx]
+            if not proc in self.shapeMap[bin].keys():
+                if '*' in self.shapeMap[bin].keys():
+                    path = self.shapeMap[bin]['*'][idx]
+            else: path = self.shapeMap[bin][proc][idx]
         return path
 
     def path_to_file(self, bin, proc) :
@@ -99,7 +102,8 @@ class Datacard():
         If the option resolve is True the keywords $CHANNEL correp. to bin and $PROCESS corresp. to proc are replaced
         by their corresponding real values. Other potential keywords remain unchanged.
         """
-        return self.barcode(bin, proc, 1).replace('$CHANNEL',bin).replace('$PROCESS',proc) if resolve else self.barcode(bin, proc, 1)
+        if self.barcode(bin, proc, 0) == "FAKE": return ''
+        else: return self.barcode(bin, proc, 1).replace('$CHANNEL',bin).replace('$PROCESS',proc) if resolve else self.barcode(bin, proc, 1)
 
     def shape(self, bin, proc, resolve) :
         """
