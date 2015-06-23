@@ -161,6 +161,7 @@ class SMLikeHiggsModel(PhysicsModel):
         (processSource, foundDecay, foundEnergy) = getHiggsProdDecMode(bin,process,self.options)
         return self.getHiggsSignalYieldScale(processSource, foundDecay, foundEnergy)
 
+
 class StrictSMLikeHiggsModel(SMLikeHiggsModel):
     "Doesn't do anything more, but validates that the signal process names are correct"
     def getHiggsSignalYieldScale(self,production,decay, energy):
