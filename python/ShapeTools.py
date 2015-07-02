@@ -51,7 +51,9 @@ class ShapeBuilder(ModelBuilder):
                 if self.physics.getYieldScale(b,p) == 0: continue # exclude really the pdf
                 #print "  +--- Getting pdf for %s in bin %s" % (p,b)
                 (pdf,coeff) = (self.getPdf(b,p), self.out.function("n_exp_bin%s_proc_%s" % (b,p)))
-                if (self.options.bbb): pdf.setBinParams(binVarList, binScaleList)
+                if (self.options.bbb) and not self.DC.isSignal[p]: 
+                    if not (binVarList,binScaleList) == (None,None):
+                        pdf.setBinParams(binVarList, binScaleList)
                 if self.options.optimizeExistingTemplates:
                     pdf1 = self.optimizeExistingTemplates(pdf)
                     if (pdf1 != pdf):
@@ -608,10 +610,15 @@ class ShapeBuilder(ModelBuilder):
         return pdf
     def createBBLiteVars(self, b):
         print 'Doing bb-lite for bin ' + b
-        procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0]
+        procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0 and not self.DC.isSignal[p]]
         print procs
         ROOT.TH1.SetDefaultSumw2(True)
-        hsum = self.getShape(b,procs[0]).Clone()
+        htemp = self.getShape(b,procs[0])
+        if htemp != None:
+            hsum = htemp.Clone()
+        else: 
+            return (None,None)
+
         for p in procs[1:]:
             hsum.Add(self.getShape(b,p))
         hsum.Print("range")
@@ -619,6 +626,8 @@ class ShapeBuilder(ModelBuilder):
         binVarList = ROOT.RooArgList()
         binScaleList = ROOT.RooArgList()
         for x in range(nbins):
+            scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
+            print scalevar
             binvar = b + '_bbblite_' + str(x)
             print 'Creating bbb param ' + binvar                
             self.doObj("%s_Pdf" % binvar, "SimpleGaussianConstraint", "%s[-4,4], %s_In[0,-4,4], %g" % (binvar,binvar,1))
@@ -628,7 +637,6 @@ class ShapeBuilder(ModelBuilder):
             self.globalobs.append("%s_In" % binvar)
             self.out.nuisVars.add(self.out.var(binvar))
             self.out.nuisPdfs.add(self.out.pdf(binvar+"_Pdf"))
-            scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
             self.doObj("%s_Scale" % binvar, "ConstVar", "%g" % (scalevar))
             binVarList.add(self.out.var(binvar))
             binScaleList.add(self.out.function(binvar+'_Scale'))
