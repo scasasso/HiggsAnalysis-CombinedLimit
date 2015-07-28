@@ -51,7 +51,7 @@ class ShapeBuilder(ModelBuilder):
                 if self.physics.getYieldScale(b,p) == 0: continue # exclude really the pdf
                 #print "  +--- Getting pdf for %s in bin %s" % (p,b)
                 (pdf,coeff) = (self.getPdf(b,p), self.out.function("n_exp_bin%s_proc_%s" % (b,p)))
-                if (self.options.bbb) and not self.DC.isSignal[p]: 
+                if (self.options.bbb):
                     if not (binVarList,binScaleList) == (None,None):
                         pdf.setBinParams(binVarList, binScaleList)
                 if self.options.optimizeExistingTemplates:
@@ -610,7 +610,7 @@ class ShapeBuilder(ModelBuilder):
         return pdf
     def createBBLiteVars(self, b):
         print 'Doing bb-lite for bin ' + b
-        procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0 and not self.DC.isSignal[p]]
+        procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0]
         print procs
         ROOT.TH1.SetDefaultSumw2(True)
         htemp = self.getShape(b,procs[0])
