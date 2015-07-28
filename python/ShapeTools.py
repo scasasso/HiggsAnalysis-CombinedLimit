@@ -46,6 +46,8 @@ class ShapeBuilder(ModelBuilder):
             coeffs = ROOT.RooArgList(); bgcoeffs = ROOT.RooArgList()
             if self.options.bbb:
                 (binVarList, binScaleList) = self.createBBLiteVars(b)
+            if self.options.mhtShape:
+                (binVarListMHTShape, binScaleListMHTShape) = self.createMHTShapeVars(b)
             for p in self.DC.exp[b].keys(): # so that we get only self.DC.processes contributing to this bin
                 if self.DC.exp[b][p] == 0: continue
                 if self.physics.getYieldScale(b,p) == 0: continue # exclude really the pdf
@@ -54,6 +56,9 @@ class ShapeBuilder(ModelBuilder):
                 if (self.options.bbb) and not self.DC.isSignal[p]: 
                     if not (binVarList,binScaleList) == (None,None):
                         pdf.setBinParams(binVarList, binScaleList)
+                if (self.options.mhtShape) and not self.DC.isSignal[p]: 
+                    if not (binVarListMHTShape,binScaleListMHTShape) == (None,None):
+                        pdf.setBinParams2(binVarListMHTShape, binScaleListMHTShape)
                 if self.options.optimizeExistingTemplates:
                     pdf1 = self.optimizeExistingTemplates(pdf)
                     if (pdf1 != pdf):
@@ -609,9 +614,9 @@ class ShapeBuilder(ModelBuilder):
                 return ret
         return pdf
     def createBBLiteVars(self, b):
-        print 'Doing bb-lite for bin ' + b
+        if self.options.verbose > 2: print 'Doing bb-lite for bin ' + b
         procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0 and not self.DC.isSignal[p]]
-        print procs
+        if self.options.verbose > 2: print procs
         ROOT.TH1.SetDefaultSumw2(True)
         htemp = self.getShape(b,procs[0])
         if htemp != None:
@@ -621,15 +626,15 @@ class ShapeBuilder(ModelBuilder):
 
         for p in procs[1:]:
             hsum.Add(self.getShape(b,p))
-        hsum.Print("range")
+        if self.options.verbose > 2: hsum.Print("range")
         nbins = hsum.GetNbinsX()
         binVarList = ROOT.RooArgList()
         binScaleList = ROOT.RooArgList()
         for x in range(nbins):
             scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
-            print scalevar
+            if self.options.verbose > 2: print scalevar
             binvar = b + '_bbblite_' + str(x)
-            print 'Creating bbb param ' + binvar                
+            if self.options.verbose > 2: print 'Creating bbb param ' + binvar                
             self.doObj("%s_Pdf" % binvar, "SimpleGaussianConstraint", "%s[-4,4], %s_In[0,-4,4], %g" % (binvar,binvar,1))
             self.out.var(binvar).setConstant(False)
             self.out.var(binvar).setVal(0)
@@ -644,3 +649,59 @@ class ShapeBuilder(ModelBuilder):
         binScaleList.Print("v")
         return (binVarList, binScaleList)
 
+
+    def createMHTShapeVars(self, b):
+        print 'Doing shape systematics for bin ' + b
+        if b != "had": return (None,None)
+        
+        procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0 and not self.DC.isSignal[p]]
+        ROOT.TH1.SetDefaultSumw2(True)
+
+        for p in procs:
+            print ' -> process ',p
+            htemp = self.getShape(b,p)
+            if htemp != None:
+                h = htemp.Clone()
+            else: 
+                return (None,None)
+            nbins = h.GetNbinsX()
+            binVarList = ROOT.RooArgList()
+            binScaleList = ROOT.RooArgList()
+            for x in range(nbins):
+                # MHT value
+                mht = h.GetBinCenter(x+1)
+
+                # Bin Content
+                yieldVarName = "yield_"+str(p)+"_"+str(b)+"_"+str(x)
+                self.doVar(yieldVarName+"["+str(h.GetBinContent(x))+"]")
+                self.out.var(yieldVarName).setConstant(True)
+                
+                binvar = b + '_mhtShapeSyst_' + str(mht)
+                print 'Creating mht shape systematic param ' + binvar
+                
+                # Define the scale parameter
+                scalevar = 0.8
+                # scalevar = 0.7 if h.GetBinContent(x+1) > 0 and mht > 400 else 0.
+                # print scalevar
+                self.doObj("%s_Scale" % binvar, "ConstVar", "%g" % (scalevar))
+                binScaleList.add(self.out.function(binvar+'_Scale'))
+
+                lastBinStrBase="expr::%s" % binvar
+                exprStrBase=""
+                # if x<nbins:
+                if True:
+                    # Define the pdf of the nuisance
+                    self.doObj("%s_Pdf" % binvar, "SimpleGaussianConstraint", "%s[-4,4], %s_In[0,-4,4], %g" % (binvar,binvar,1))
+                    self.out.var(binvar).setConstant(False)
+                    self.out.var(binvar).setVal(0)
+                    self.out.var(binvar).setError(1)
+                    self.globalobs.append("%s_In" % binvar)
+                    self.out.nuisVars.add(self.out.var(binvar))
+                    self.out.nuisPdfs.add(self.out.pdf(binvar+"_Pdf"))
+                else:
+                    self.factory_('expr::%s("@0*@0 * (@1+@2)", kV, SM_BR_hzz, SM_BR_hww)')
+
+                binVarList.add(self.out.var(binvar))
+            binVarList.Print("v")
+            binScaleList.Print("v")
+            return (binVarList, binScaleList)

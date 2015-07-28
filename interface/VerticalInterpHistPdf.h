@@ -263,6 +263,7 @@ protected:
 
   // for now use a second sentry to check if per-bin parameters have changed
   mutable SimpleCacheSentry _sentryBins; //! not to be serialized
+  /* mutable SimpleCacheSentry _sentryBins2; //! not to be serialized (MHT shape params) */
 
   // For additive morphing, histograms of (fUp-f0)+(fDown-f0) and (fUp-f0)-(fDown-f0)
   // For multiplicative morphing, log(fUp/f0)+log(fDown/f0),  log(fUp/f0)-log(fDown/f0)
@@ -305,13 +306,20 @@ public:
   FastVerticalInterpHistPdf2(const FastVerticalInterpHistPdf2& other, const char* name=0) :
     FastVerticalInterpHistPdf2Base(other, name),
     _x("x",this,other._x),
-    _cache(other._cache), _cache2(other._cache2), _cacheNominal(other._cacheNominal), _cacheNominalLog(other._cacheNominalLog),
+    _cache(other._cache), _cache2(other._cache2)/* , _cache3(other._cache3) */, _cacheNominal(other._cacheNominal), _cacheNominalLog(other._cacheNominalLog),
     _binScaleList("binScaleList", this, other._binScaleList),
-    _binParamList("binParamList", this, other._binParamList) {
+    _binParamList("binParamList", this, other._binParamList)/* , */
+    /* _binScaleList2("binScaleList2", this, other._binParamList2), */
+    /* _binParamList2("binParamList2", this, other._binParamList2) */
+    {
       if (_initBase) {
         _sentryBins.addVars(_binParamList);
         _sentryBins.addVars(_coefList);
         _sentryBins.setValueDirty();
+        /* _sentryBins2.addVars(_binParamList2); */
+        /* _sentryBins2.addVars(_binParamList); */
+        /* _sentryBins2.addVars(_coefList); */
+        /* _sentryBins2.setValueDirty(); */
       }
     }
   explicit FastVerticalInterpHistPdf2(const FastVerticalInterpHistPdf& other, const char* name=0) ;
@@ -322,8 +330,12 @@ public:
   Double_t evaluate() const ;
 
   unsigned setBinParams(RooArgList & vars, RooArgList & scales);
+  /* unsigned setBinParams2(RooArgList & vars, RooArgList & scales); */
   inline RooListProxy const& binVars() const { return _binParamList; }
   inline RooListProxy const& binScales() const { return _binScaleList; }
+  /* inline RooListProxy const& binVars2() const { return _binParamList2; } */
+  /* inline RooListProxy const& binScales2() const { return _binScaleList2; } */
+
 
   friend class FastVerticalInterpHistPdf2V;
 protected:
@@ -334,6 +346,7 @@ protected:
   // When using bin-altering params make use of a two-stage cache
   // so we don't have to re-do the morphs when only a bin param changes
   mutable FastHisto _cache2; //! not to be serialized
+  /* mutable FastHisto _cache3; // for MHT shape */
 
   /// Cache of nominal pdf (additive morphing) and its bin-by-bin logarithm (multiplicative)
   FastHisto _cacheNominal; 
@@ -341,9 +354,13 @@ protected:
 
   RooListProxy _binScaleList; // Bin scale factors for Barlow-Beeston
   RooListProxy _binParamList; // Bin scale factors for Barlow-Beeston
+  /* RooListProxy _binScaleList2; // Bin scale factors for MHT shape */
+  /* RooListProxy _binParamList2; // Bin scale factors for MHT shape */
+
 
   void syncTotal() const ;
   void syncBins() const ;
+  /* void syncBins2() const ; */
   void initNominal(TObject *nominal) ;
   void initComponent(int which, TObject *hi, TObject *lo) ;
 

@@ -772,6 +772,22 @@ unsigned FastVerticalInterpHistPdf2::setBinParams(RooArgList & vars, RooArgList 
   return _cacheNominal.size();
 }
 
+// unsigned FastVerticalInterpHistPdf2::setBinParams2(RooArgList & vars, RooArgList & scales) {
+//   // std::cout << "vars: " << vars.getSize() << "\tscales: " << scales.getSize()
+//   // << "\tbins: " << _cacheNominal.size() << "\n";
+
+//   // Possible that _cacheNominal can have more bins than the input TH1 due to
+//   // the bin optimisation in ShapeTools.py
+//   if (vars.getSize() > int(_cacheNominal.size()) ||
+//       scales.getSize() > int(_cacheNominal.size())) {
+//     std::cout << "Wrong number of params!\n";
+//     return 0;
+//   }
+//   _binParamList2.add(vars);
+//   _binScaleList2.add(scales);
+//   return _cacheNominal.size();
+// }
+
 //_____________________________________________________________________________
 FastVerticalInterpHistPdf2Base::~FastVerticalInterpHistPdf2Base()
 {
@@ -804,9 +820,12 @@ FastVerticalInterpHistPdf2Base::initBase() const
 FastVerticalInterpHistPdf2::FastVerticalInterpHistPdf2(const char *name, const char *title, const RooRealVar &x, const TList & funcList, const RooArgList& coefList, Double_t smoothRegion, Int_t smoothAlgo) :
     FastVerticalInterpHistPdf2Base(name,title,RooArgSet(x),funcList,coefList,smoothRegion,smoothAlgo),
     _x("x","Independent variable",this,const_cast<RooRealVar&>(x)),
-    _cache(), _cache2(), _cacheNominal(), _cacheNominalLog(),
+    _cache(), _cache2()// , _cache3()
+    , _cacheNominal(), _cacheNominalLog(),
     _binScaleList("binScaleList", "", this),
-    _binParamList("binParamList", "", this)
+    _binParamList("binParamList", "", this)// ,
+    // _binScaleList2("binScaleList2", "", this),
+    // _binParamList2("binParamList2", "", this)
 {
     initBase();
     initNominal(funcList.At(0));
@@ -836,7 +855,8 @@ FastVerticalInterpHistPdf2D2::FastVerticalInterpHistPdf2D2(const char *name, con
 FastVerticalInterpHistPdf2::FastVerticalInterpHistPdf2(const FastVerticalInterpHistPdf& other, const char* name) :
     FastVerticalInterpHistPdf2Base(other,name),
     _x("x",this,other._x),
-    _cache(), _cache2(), _cacheNominal(), _cacheNominalLog()
+    _cache(), _cache2()// , _cache3()
+    , _cacheNominal(), _cacheNominalLog()
 {
     initBase();
     other.getVal(RooArgSet(_x.arg()));
@@ -874,12 +894,18 @@ Double_t FastVerticalInterpHistPdf2::evaluate() const
     _sentryBins.addVars(_binParamList);
     _sentryBins.addVars(_coefList);
     _sentryBins.setValueDirty();
+    // _sentryBins2.addVars(_binParamList2);
+    // _sentryBins2.addVars(_binParamList); // not 100% sure this is needed
+    // _sentryBins2.addVars(_coefList);
+    // _sentryBins2.setValueDirty();
   }
   if (_cache.size() == 0) _cache = _cacheNominal; // _cache is not persisted
   // Only need to sync morphs when first sentry is not good
   if (!_sentry.good()) syncTotal();
   // Have to sync bins when anything changes
   if (!_sentryBins.good()) syncBins();
+  // // Have to sync bins when anything changes
+  // if (!_sentryBins2.good()) syncBins2();
   return _cache.GetAt(_x);
 }
 Double_t FastVerticalInterpHistPdf2D2::evaluate() const 
@@ -895,10 +921,12 @@ void FastVerticalInterpHistPdf2::setActiveBins(unsigned int bins) {
   assert(bins <= _cacheNominal.fullsize());
   if (_cache.size() == 0) _cache = _cacheNominal; // _cache is not persisted
   if (_cache2.size() == 0) _cache2 = _cacheNominal; // _cache is not persisted
+  // if (_cache3.size() == 0) _cache3 = _cacheNominal; // _cache is not persisted
   _cache.CropUnderflows(1e-9,false);        // set all bins, also the non-active ones
   _cacheNominal.CropUnderflows(1e-9,false); // set all bins, also the non-active ones
   _cache.SetActiveSize(bins);
   _cache2.SetActiveSize(bins);
+  // _cache3.SetActiveSize(bins);
   _cacheNominal.SetActiveSize(bins);
   _cacheNominalLog.SetActiveSize(bins);
   for (Morph & m : _morphs) {
@@ -1064,37 +1092,73 @@ void FastVerticalInterpHistPdf2Base::syncTotal(FastTemplate &cache, const FastTe
 }
 
 void FastVerticalInterpHistPdf2::syncTotal() const {
-    LAUNCH_FUNCTION_TIMER(__timer__, __token__) // DEBUG
-    if (_binParamList.getSize() > 0) {
-      // If we're doing bb-lite, morph into _cache2 instead
-      if (_cache2.size() == 0) _cache2 = _cache;
-      FastVerticalInterpHistPdf2Base::syncTotal(_cache2, _cacheNominal, _cacheNominalLog);
-      _cache2.Normalize();
-    } else {
-      FastVerticalInterpHistPdf2Base::syncTotal(_cache, _cacheNominal, _cacheNominalLog);
-      _cache.Normalize();
-    }
-    //printf("Normalized result\n");  _cache.Dump();
+    // LAUNCH_FUNCTION_TIMER(__timer__, __token__) // DEBUG
+      // if (_binParamList2.getSize() > 0){
+      // 	// If we are doing MHT shape, morph into _cache3 instead
+      // 	if (_cache3.size() == 0) _cache3 = _cache;
+      // 	FastVerticalInterpHistPdf2Base::syncTotal(_cache3, _cacheNominal, _cacheNominalLog);
+      // 	_cache3.Normalize();	
+      // } else
+  if (_binParamList.getSize() > 0) {      
+    // If we're doing bb-lite, morph into _cache2 instead
+    if (_cache2.size() == 0) _cache2 = _cache;
+    FastVerticalInterpHistPdf2Base::syncTotal(_cache2, _cacheNominal, _cacheNominalLog);
+    _cache2.Normalize();
+  } else {
+    FastVerticalInterpHistPdf2Base::syncTotal(_cache, _cacheNominal, _cacheNominalLog);
+    _cache.Normalize();
+  }
+  //printf("Normalized result\n");  _cache.Dump();
 }
 
 void FastVerticalInterpHistPdf2::syncBins() const {
-    LAUNCH_FUNCTION_TIMER(__timer__, __token__) // DEBUG
+    // LAUNCH_FUNCTION_TIMER(__timer__, __token__) // DEBUG
     if (_binParamList.getSize() > 0) {
+      _cache.Dump();
       _cache.Clear(); // FIXME: not sure why I need to do this
       // printf("[SyncTotal]: %s\n", this->GetName());
       for (int i = 0; i < _binParamList.getSize(); ++i) {
         double var = static_cast<RooRealVar*>(_binParamList.at(i))->getVal();
         double err = static_cast<RooConstVar*>(_binScaleList.at(i))->getVal();
+	std::cout << "_cache[" << i << "] = " << _cache[i] << ", _cache2[" << i << "] = " << _cache2[i] << std::endl;
         _cache[i] = _cache2[i] * (1. + var*err);
         //printf("%i %7.5f %7.5f %7.5f %7.5f\n", i, _cache2[i], err, var, _cache[i]);
 
       }
       // normalize the result
       _cache.CropUnderflows();
+      // std::cout << "$%^ Dump cache histo BEFORE normalizing: " << _cache.Integral() << std::endl;
+      // _cache.Dump();
       _cache.Normalize();
+      // std::cout << "$%^ Dump cache histo AFTER normalizing: " << _cache.Integral() << std::endl;
+      // _cache.Dump();
       _sentryBins.reset();
     }
 }
+
+
+// void FastVerticalInterpHistPdf2::syncBins2() const {
+//   if (_binParamList2.getSize() > 0) {      
+//     _cache.Clear(); // FIXME: not sure why I need to do this    
+//     // printf("[SyncTotal]: %s\n", this->GetName());
+//     for (int i = 0; i < _binParamList2.getSize(); ++i) {
+//       double var = static_cast<RooRealVar*>(_binParamList2.at(i))->getVal();
+//       double err = static_cast<RooConstVar*>(_binScaleList2.at(i))->getVal();
+//       _cache[i] = _cache3[i] * (1. + var*err);
+//       //printf("%i %7.5f %7.5f %7.5f %7.5f\n", i, _cache2[i], err, var, _cache[i]);
+      
+//     }      
+//     // normalize the result
+//     _cache.CropUnderflows();
+//     // std::cout << "******" << typeid(_cache).name() << std::endl;
+//     std::cout << "$%^ Dump cache histo BEFORE normalizing: " << _cache.Integral() << std::endl;
+//     _cache.Dump();
+//     _cache.Normalize();
+//     std::cout << "$%^ Dump cache histo AFTER normalizing: " << _cache.Integral() << std::endl;
+//     _cache.Dump();
+//     _sentryBins2.reset();
+//   }
+// }
 
 void FastVerticalInterpHistPdf2D2::syncTotal() const {
     FastVerticalInterpHistPdf2Base::syncTotal(_cache, _cacheNominal, _cacheNominalLog);
@@ -1114,10 +1178,15 @@ FastVerticalInterpHistPdf2V::FastVerticalInterpHistPdf2V(const FastVerticalInter
       hpdf._sentryBins.addVars(hpdf._binParamList);
       hpdf._sentryBins.addVars(hpdf._coefList);
       hpdf._sentryBins.setValueDirty();
+      // hpdf._sentryBins2.addVars(hpdf._binParamList2);
+      // hpdf._sentryBins2.addVars(hpdf._binParamList); // not 100% sure this is needed
+      // hpdf._sentryBins2.addVars(hpdf._coefList);
+      // hpdf._sentryBins2.setValueDirty();
     }
     if (hpdf._cache.size() == 0) hpdf._cache = hpdf._cacheNominal;
     if (!hpdf._sentry.good()) hpdf.syncTotal();
     if (!hpdf._sentryBins.good()) hpdf.syncBins();
+    // if (!hpdf._sentryBins2.good()) hpdf.syncBins2();
     // find bins
     std::vector<int> bins;
     RooArgSet obs(hpdf._x.arg());
@@ -1164,6 +1233,7 @@ void FastVerticalInterpHistPdf2V::fill(std::vector<Double_t> &out) const
 {
     if (!hpdf_._sentry.good()) hpdf_.syncTotal();
     if (!hpdf_._sentryBins.good()) hpdf_.syncBins();
+    // if (!hpdf_._sentryBins2.good()) hpdf_.syncBins2();
     if (begin_ != end_) {
         out.resize(end_-begin_);
         std::copy(& hpdf_._cache.GetBinContent(begin_), & hpdf_._cache.GetBinContent(end_), out.begin());
