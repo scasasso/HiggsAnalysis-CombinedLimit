@@ -1,6 +1,8 @@
 from sys import stdout, stderr
 import os.path
 import ROOT
+from numpy import median
+from math import sqrt
 
 from HiggsAnalysis.CombinedLimit.ModelTools import ModelBuilder
 
@@ -44,10 +46,12 @@ class ShapeBuilder(ModelBuilder):
             #print "  + Getting model for bin %s" % (b)
             pdfs   = ROOT.RooArgList(); bgpdfs   = ROOT.RooArgList()
             coeffs = ROOT.RooArgList(); bgcoeffs = ROOT.RooArgList()
+            (binVarList, binScaleList) = (None, None)
+            (binVarListSig, binScaleListSig) = (None, None)
             if self.options.bbb:
-                (binVarList, binScaleList) = self.createBBLiteVars(b,self.options.bbbThreshold)
-                (binVarListSig, binScaleListSig) = (None, None)
-                if b=="had" and self.options.bbbSig: (binVarListSig, binScaleListSig) = self.createBBLiteVarsSig(b,self.options.bbbThreshold)
+                (binVarList, binScaleList) = self.createBBLiteVars(b,self.options.bbbThreshold)                
+            if "had" in b and self.options.bbbSig: 
+                (binVarListSig, binScaleListSig) = self.createBBLiteVarsSig(b,self.options.bbbThreshold)
             for p in self.DC.exp[b].keys(): # so that we get only self.DC.processes contributing to this bin
                 if self.DC.exp[b][p] == 0: continue
                 if self.physics.getYieldScale(b,p) == 0: continue # exclude really the pdf
@@ -663,26 +667,64 @@ class ShapeBuilder(ModelBuilder):
         nbins = hsum.GetNbinsX()
         binVarList = ROOT.RooArgList()
         binScaleList = ROOT.RooArgList()
-        for x in range(nbins):            
-            if hsum.GetBinContent(x+1)>0.: scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
-            else: scalevar = 1.
-            # mc_w = hsum.GetBinContent(x+1)
-            # mc_w_err = hsum.GetBinError(x+1)
-            # mc_unw = (mc_w/mc_w_err)**2
-            if scalevar > thr:
-                print scalevar
-                binvar = b + '_bbbliteSig_' + str(x)
-                print 'Creating bbb param ' + binvar                
-                self.doObj("%s_Pdf" % binvar, "SimpleGaussianConstraint", "%s[-4,4], %s_In[0,-4,4], %g" % (binvar,binvar,1))
-                self.out.var(binvar).setConstant(False)
-                self.out.var(binvar).setVal(0)
-                self.out.var(binvar).setError(1)
-                self.globalobs.append("%s_In" % binvar)
-                self.out.nuisVars.add(self.out.var(binvar))
-                self.out.nuisPdfs.add(self.out.pdf(binvar+"_Pdf"))
-                self.doObj("%s_Scale" % binvar, "ConstVar", "%g" % (scalevar))
-                binVarList.add(self.out.var(binvar))
-                binScaleList.add(self.out.function(binvar+'_Scale'))
+        weights = []
+        for x in range(nbins): 
+            if hsum.GetBinContent(x+1)>0.: 
+                w = (hsum.GetBinError(x+1)**2)/hsum.GetBinContent(x+1)
+                weights.append(w)
+
+        avgWeight = median(weights)
+        
+        for x in range(nbins):         
+
+            mc_w = hsum.GetBinContent(x+1)
+            mc_unw, binW = 0., 0.
+
+            # # Debugging
+            # # mc_w = 0.
+            # mc_unw = 100
+            # if mc_w>0.: binW = mc_w/mc_unw
+            # else: binW = avgWeight
+
+            if mc_w>0.:
+                mc_w_err = hsum.GetBinError(x+1)
+                mc_unw = (mc_w/mc_w_err)**2
+                binW = mc_w/mc_unw
+            else: binW = avgWeight
+
+            scalevar = binW
+            
+            print scalevar
+            binvar = b + '_bbbliteSig_' + str(x)
+            print 'Creating bbb param ' + binvar                
+
+
+            minExp = mc_unw+1 if mc_unw > 0 else 0;
+            while (ROOT.TMath.Poisson(mc_unw, minExp) > 1e-12) and minExp > 0: 
+                minExp *= 0.8;
+            maxExp = mc_unw+1;
+            while (ROOT.TMath.Poisson(mc_unw, maxExp) > 1e-12): 
+                maxExp *= 1.2;
+            minObs = mc_unw;
+            while minObs > 0 and (ROOT.TMath.Poisson(minObs, mc_unw+1) > 1e-12): 
+                minObs -= (sqrt(mc_unw) if mc_unw > 10 else 1);
+            maxObs = mc_unw+2;
+            while (ROOT.TMath.Poisson(maxObs, mc_unw+1) > 1e-12): 
+                maxObs += (sqrt(mc_unw) if mc_unw > 10 else 2);
+            self.doObj("%s_Pdf" % binvar, "Poisson", "%s_In[%d,%f,%f], %s[%f,%f,%f], 1" % (binvar,mc_unw,minObs,maxObs,binvar,mc_unw+1,minExp,maxExp))
+            print "%s_Pdf" % binvar, "Poisson", "%s_In[%d,%f,%f], %s[%f,%f,%f], 1" % (binvar,mc_unw,minObs,maxObs,binvar,mc_unw+1,minExp,maxExp)
+            self.out.var(binvar).setConstant(False)
+            # self.out.var(binvar).setVal(0)
+            # self.out.var(binvar).setError(1)
+            self.globalobs.append("%s_In" % binvar)
+            self.out.nuisVars.add(self.out.var(binvar))
+            self.out.nuisPdfs.add(self.out.pdf(binvar+"_Pdf"))
+            
+            self.doObj("%s_Scale" % binvar, "ConstVar", "%g" % (scalevar))
+            binVarList.add(self.out.var(binvar))
+            binScaleList.add(self.out.function(binvar+'_Scale'))
+
+
         binVarList.Print("v")
         binScaleList.Print("v")
         return (binVarList, binScaleList)
