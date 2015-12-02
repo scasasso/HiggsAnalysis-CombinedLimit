@@ -45,7 +45,9 @@ class ShapeBuilder(ModelBuilder):
             pdfs   = ROOT.RooArgList(); bgpdfs   = ROOT.RooArgList()
             coeffs = ROOT.RooArgList(); bgcoeffs = ROOT.RooArgList()
             if self.options.bbb:
-                (binVarList, binScaleList) = self.createBBLiteVars(b)
+                (binVarList, binScaleList) = self.createBBLiteVars(b,self.options.bbbThreshold)
+                (binVarListSig, binScaleListSig) = (None, None)
+                if b=="had" and self.options.bbbSig: (binVarListSig, binScaleListSig) = self.createBBLiteVarsSig(b,self.options.bbbThreshold)
             for p in self.DC.exp[b].keys(): # so that we get only self.DC.processes contributing to this bin
                 if self.DC.exp[b][p] == 0: continue
                 if self.physics.getYieldScale(b,p) == 0: continue # exclude really the pdf
@@ -54,6 +56,9 @@ class ShapeBuilder(ModelBuilder):
                 if (self.options.bbb) and not self.DC.isSignal[p]: 
                     if not (binVarList,binScaleList) == (None,None):
                         pdf.setBinParams(binVarList, binScaleList)
+                if (self.options.bbbSig) and self.DC.isSignal[p]:                    
+                    if not (binVarListSig,binScaleListSig) == (None,None):
+                        pdf.setBinParams(binVarListSig, binScaleListSig)
                 if self.options.optimizeExistingTemplates:
                     pdf1 = self.optimizeExistingTemplates(pdf)
                     if (pdf1 != pdf):
@@ -608,7 +613,8 @@ class ShapeBuilder(ModelBuilder):
                 #print "Optimize %s in \t" % (pdf.GetName()),; ret.Print("")
                 return ret
         return pdf
-    def createBBLiteVars(self, b):
+    def createBBLiteVars(self, b, thr):
+    # def createBBLiteVars(self, b):
         print 'Doing bb-lite for bin ' + b
         procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0 and not self.DC.isSignal[p]]
         print procs
@@ -627,19 +633,54 @@ class ShapeBuilder(ModelBuilder):
         binScaleList = ROOT.RooArgList()
         for x in range(nbins):
             scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
-            print scalevar
-            binvar = b + '_bbblite_' + str(x)
-            print 'Creating bbb param ' + binvar                
-            self.doObj("%s_Pdf" % binvar, "SimpleGaussianConstraint", "%s[-4,4], %s_In[0,-4,4], %g" % (binvar,binvar,1))
-            self.out.var(binvar).setConstant(False)
-            self.out.var(binvar).setVal(0)
-            self.out.var(binvar).setError(1)
-            self.globalobs.append("%s_In" % binvar)
-            self.out.nuisVars.add(self.out.var(binvar))
-            self.out.nuisPdfs.add(self.out.pdf(binvar+"_Pdf"))
-            self.doObj("%s_Scale" % binvar, "ConstVar", "%g" % (scalevar))
-            binVarList.add(self.out.var(binvar))
-            binScaleList.add(self.out.function(binvar+'_Scale'))
+            if scalevar > thr:
+                print scalevar
+                binvar = b + '_bbblite_' + str(x)
+                print 'Creating bbb param ' + binvar                
+                self.doObj("%s_Pdf" % binvar, "SimpleGaussianConstraint", "%s[-4,4], %s_In[0,-4,4], %g" % (binvar,binvar,1))
+                self.out.var(binvar).setConstant(False)
+                self.out.var(binvar).setVal(0)
+                self.out.var(binvar).setError(1)
+                self.globalobs.append("%s_In" % binvar)
+                self.out.nuisVars.add(self.out.var(binvar))
+                self.out.nuisPdfs.add(self.out.pdf(binvar+"_Pdf"))
+                self.doObj("%s_Scale" % binvar, "ConstVar", "%g" % (scalevar))
+                binVarList.add(self.out.var(binvar))
+                binScaleList.add(self.out.function(binvar+'_Scale'))
+        binVarList.Print("v")
+        binScaleList.Print("v")
+        return (binVarList, binScaleList)
+
+
+    def createBBLiteVarsSig(self, b, thr):
+        print 'Doing bb-lite for signal in bin ' + b
+        procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0 and self.DC.isSignal[p]]
+        print procs
+        ROOT.TH1.SetDefaultSumw2(True)
+        hsum = self.getShape(b,procs[0])
+        hsum.Print("range")
+        nbins = hsum.GetNbinsX()
+        binVarList = ROOT.RooArgList()
+        binScaleList = ROOT.RooArgList()
+        for x in range(nbins):            
+            scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
+            # mc_w = hsum.GetBinContent(x+1)
+            # mc_w_err = hsum.GetBinError(x+1)
+            # mc_unw = (mc_w/mc_w_err)**2
+            if scalevar > thr:
+                print scalevar
+                binvar = b + '_bbbliteSig_' + str(x)
+                print 'Creating bbb param ' + binvar                
+                self.doObj("%s_Pdf" % binvar, "SimpleGaussianConstraint", "%s[-4,4], %s_In[0,-4,4], %g" % (binvar,binvar,1))
+                self.out.var(binvar).setConstant(False)
+                self.out.var(binvar).setVal(0)
+                self.out.var(binvar).setError(1)
+                self.globalobs.append("%s_In" % binvar)
+                self.out.nuisVars.add(self.out.var(binvar))
+                self.out.nuisPdfs.add(self.out.pdf(binvar+"_Pdf"))
+                self.doObj("%s_Scale" % binvar, "ConstVar", "%g" % (scalevar))
+                binVarList.add(self.out.var(binvar))
+                binScaleList.add(self.out.function(binvar+'_Scale'))
         binVarList.Print("v")
         binScaleList.Print("v")
         return (binVarList, binScaleList)
