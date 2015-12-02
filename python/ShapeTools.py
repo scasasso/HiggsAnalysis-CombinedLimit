@@ -616,7 +616,7 @@ class ShapeBuilder(ModelBuilder):
 
     def createBBLiteVars(self, b, thr):
         print 'Doing bb-lite for bin ' + b
-        procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0 and not self.DC.isSignal[p]]
+        procs = [p for p in self.DC.exp[b].keys() if self.physics.getYieldScale(b,p) != 0 and not self.DC.isSignal[p]]
         print procs
         ROOT.TH1.SetDefaultSumw2(True)
         htemp = self.getShape(b,procs[0])
@@ -632,7 +632,8 @@ class ShapeBuilder(ModelBuilder):
         binVarList = ROOT.RooArgList()
         binScaleList = ROOT.RooArgList()
         for x in range(nbins):
-            scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
+            if hsum.GetBinContent(x+1)>0.: scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
+            else: scalevar = 1.
             if scalevar > thr:
                 print scalevar
                 binvar = b + '_bbblite_' + str(x)
@@ -654,7 +655,7 @@ class ShapeBuilder(ModelBuilder):
 
     def createBBLiteVarsSig(self, b, thr):
         print 'Doing bb-lite for signal in bin ' + b
-        procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0 and self.DC.isSignal[p]]
+        procs = [p for p in self.DC.exp[b].keys() if self.physics.getYieldScale(b,p) != 0 and self.DC.isSignal[p]]
         print procs
         ROOT.TH1.SetDefaultSumw2(True)
         hsum = self.getShape(b,procs[0])
@@ -663,7 +664,8 @@ class ShapeBuilder(ModelBuilder):
         binVarList = ROOT.RooArgList()
         binScaleList = ROOT.RooArgList()
         for x in range(nbins):            
-            scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
+            if hsum.GetBinContent(x+1)>0.: scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
+            else: scalevar = 1.
             # mc_w = hsum.GetBinContent(x+1)
             # mc_w_err = hsum.GetBinError(x+1)
             # mc_unw = (mc_w/mc_w_err)**2
