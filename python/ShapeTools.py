@@ -44,10 +44,10 @@ class ShapeBuilder(ModelBuilder):
             #print "  + Getting model for bin %s" % (b)
             pdfs   = ROOT.RooArgList(); bgpdfs   = ROOT.RooArgList()
             coeffs = ROOT.RooArgList(); bgcoeffs = ROOT.RooArgList()
-            if self.options.bbb:
-                (binVarList, binScaleList) = self.createBBLiteVars(b,self.options.bbbThreshold)
-                (binVarListSig, binScaleListSig) = (None, None)
-                if b=="had" and self.options.bbbSig: (binVarListSig, binScaleListSig) = self.createBBLiteVarsSig(b,self.options.bbbThreshold)
+            (binVarList, binScaleList) = (None, None)
+            (binVarListSig, binScaleListSig) = (None, None)
+            if self.options.bbb: (binVarList, binScaleList) = self.createBBLiteVars(b,self.options.bbbThreshold)                
+            if "had" in b and self.options.bbbSig: (binVarListSig, binScaleListSig) = self.createBBLiteVarsSig(b,self.options.bbbThreshold)
             for p in self.DC.exp[b].keys(): # so that we get only self.DC.processes contributing to this bin
                 if self.DC.exp[b][p] == 0: continue
                 if self.physics.getYieldScale(b,p) == 0: continue # exclude really the pdf
@@ -666,9 +666,6 @@ class ShapeBuilder(ModelBuilder):
         for x in range(nbins):            
             if hsum.GetBinContent(x+1)>0.: scalevar = (hsum.GetBinError(x+1) / hsum.GetBinContent(x+1)) if hsum.GetBinContent(x+1) > 0 else 0.
             else: scalevar = 1.
-            # mc_w = hsum.GetBinContent(x+1)
-            # mc_w_err = hsum.GetBinError(x+1)
-            # mc_unw = (mc_w/mc_w_err)**2
             if scalevar > thr:
                 print scalevar
                 binvar = b + '_bbbliteSig_' + str(x)
