@@ -613,8 +613,8 @@ class ShapeBuilder(ModelBuilder):
                 #print "Optimize %s in \t" % (pdf.GetName()),; ret.Print("")
                 return ret
         return pdf
+
     def createBBLiteVars(self, b, thr):
-    # def createBBLiteVars(self, b):
         print 'Doing bb-lite for bin ' + b
         procs = [p for p in self.DC.exp[b].keys() if self.DC.exp[b][p] != 0 and self.physics.getYieldScale(b,p) != 0 and not self.DC.isSignal[p]]
         print procs
